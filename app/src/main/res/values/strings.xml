@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Fix All</string>
+
+    <string name="logo_icon_content_description">Логотип</string>
+    <string name="invalid_credentials">Неверное имя пользователя или пароль</string>
+    <string name="network_error">Нет соединения с интернетом</string>
+    <string name="server_error">Ошибка сервера</string>
+    <string name="unknown_error">Что-то пошло не так</string>
+    <string name="no_account">Нет аккаунта?</string>
+    <string name="create_it_free">Создайте его бесплатно</string>
+    <string name="logging_in">Вход</string>
+    <string name="username">Имя пользователя</string>
+    <string name="password">Пароль</string>
+    <string name="log_in">Войти</string>
+    <string name="warning_icon">Предупреждающая иконка</string>
+    <string name="hide_password">Скрыть пароль</string>
+    <string name="show_password">Показать пароль</string>
+    <string name="field_cant_be_blank">Это поле не может быть пустым</string>
 </resources>
