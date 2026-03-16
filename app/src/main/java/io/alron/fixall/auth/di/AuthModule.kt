@@ -8,11 +8,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.alron.fixall.BuildConfig
 import io.alron.fixall.auth.data.remote.api.AuthApi
-import io.alron.fixall.auth.data.repository.LoginRepositoryImpl
+import io.alron.fixall.auth.data.repository.AuthRepositoryImpl
 import io.alron.fixall.auth.data.storage.TokenStorage
 import io.alron.fixall.auth.data.storage.TokenStorageImpl
-import io.alron.fixall.auth.domain.repository.LoginRepository
+import io.alron.fixall.auth.domain.repository.AuthRepository
 import io.alron.fixall.auth.domain.usecase.LoginUseCase
+import io.alron.fixall.auth.domain.usecase.RegisterUseCase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -37,13 +38,18 @@ object AuthModule {
         TokenStorageImpl(context)
 
     @Provides
-    fun provideLoginRepository(
+    @Singleton
+    fun provideAuthRepository(
         api: AuthApi,
         tokenStorage: TokenStorage
-    ): LoginRepository =
-        LoginRepositoryImpl(api, tokenStorage)
+    ): AuthRepository =
+        AuthRepositoryImpl(api, tokenStorage)
 
     @Provides
-    fun provideLoginUseCase(repository: LoginRepository): LoginUseCase =
+    fun provideLoginUseCase(repository: AuthRepository): LoginUseCase =
         LoginUseCase(repository)
+
+    @Provides
+    fun provideRegisterUseCase(repository: AuthRepository): RegisterUseCase =
+        RegisterUseCase(repository)
 }

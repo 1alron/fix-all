@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +26,8 @@ import io.alron.fixall.ui.theme.FixAllTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthTopBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -47,14 +50,16 @@ fun AuthTopBar(
                 )
             }
         },
+        navigationIcon = {
+            if (onBack != null) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back)
+                    )
+                }
+            }
+        },
         modifier = modifier
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AuthTopBarPreview() {
-    FixAllTheme {
-        AuthTopBar()
-    }
 }

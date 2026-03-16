@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.alron.fixall.R
 import io.alron.fixall.auth.domain.model.LoginResult
 import io.alron.fixall.auth.domain.usecase.LoginUseCase
+import io.alron.fixall.auth.presentation.util.UiText
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,30 +29,30 @@ class LoginViewModel @Inject constructor(
                 _uiState.value.password
             )) {
                 is LoginResult.Success -> {
-                    _uiState.value = _uiState.value.copy(networkErrorResId = null)
+                    _uiState.value = _uiState.value.copy(networkError = null)
                 }
 
                 is LoginResult.InvalidCredentials -> {
                     _uiState.value = _uiState.value.copy(
-                        networkErrorResId = R.string.invalid_credentials
+                        networkError = UiText.StringResource(R.string.invalid_credentials)
                     )
                 }
 
                 is LoginResult.NetworkError -> {
                     _uiState.value = _uiState.value.copy(
-                        networkErrorResId = R.string.network_error
+                        networkError = UiText.StringResource(R.string.network_error)
                     )
                 }
 
                 is LoginResult.ServerError -> {
                     _uiState.value = _uiState.value.copy(
-                        networkErrorResId = R.string.server_error
+                        networkError = UiText.StringResource(R.string.server_error)
                     )
                 }
 
                 is LoginResult.UnknownError -> {
                     _uiState.value = _uiState.value.copy(
-                        networkErrorResId = R.string.unknown_error
+                        networkError = UiText.StringResource(R.string.unknown_error)
                     )
                 }
             }
@@ -60,22 +61,26 @@ class LoginViewModel @Inject constructor(
     }
 
     fun updateUsername(username: String) {
-        _uiState.value = _uiState.value.copy(username = username, usernameErrorResId = null)
+        _uiState.value = _uiState.value.copy(username = username, usernameError = null)
     }
 
     fun updatePassword(password: String) {
-        _uiState.value = _uiState.value.copy(password = password, passwordErrorResId = null)
+        _uiState.value = _uiState.value.copy(password = password, passwordError = null)
     }
 
     private fun validateFields(): Boolean {
         var isValid = true
         if (_uiState.value.username.isEmpty()) {
             isValid = false
-            _uiState.value = _uiState.value.copy(usernameErrorResId = R.string.field_cant_be_blank)
+            _uiState.value = _uiState.value.copy(
+                usernameError = UiText.StringResource(R.string.field_cant_be_blank)
+            )
         }
         if (_uiState.value.password.isEmpty()) {
             isValid = false
-            _uiState.value = _uiState.value.copy(passwordErrorResId = R.string.field_cant_be_blank)
+            _uiState.value = _uiState.value.copy(
+                passwordError = UiText.StringResource(R.string.field_cant_be_blank)
+            )
         }
         return isValid
     }

@@ -16,4 +16,23 @@
     <string name="hide_password">Скрыть пароль</string>
     <string name="show_password">Показать пароль</string>
     <string name="field_cant_be_blank">Это поле не может быть пустым</string>
+
+    <string name="registration">Регистрация</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="register">Зарегистрироваться</string>
+    <string name="already_have_account">Уже есть аккаунт?</string>
+
+    <string name="first_name">Имя</string>
+    <string name="last_name">Фамилия</string>
+    <string name="email">Email</string>
+    <string name="passwords_dont_match">Пароли не совпадают</string>
+    <string name="continue_button">Продолжить</string>
+    <string name="back">Назад</string>
+    <string name="invalid_email_format">Неверный формат email</string>
+    <string name="password_too_short">Пароль должен содержать минимум 8 символов</string>
+
+    <string name="confirm_you_agree_with">Подтвердите, что вы ознакомились и согласны с</string>
+    <string name="and">и</string>
+    <string name="policy">Политикой конфиденциальности</string>
+    <string name="terms_of_use">Условиями использования</string>
 </resources>

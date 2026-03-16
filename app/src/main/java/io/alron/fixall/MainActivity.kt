@@ -4,13 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import io.alron.fixall.auth.presentation.components.AuthTopBar
+import io.alron.fixall.auth.presentation.AuthRoute
 import io.alron.fixall.auth.presentation.login.LoginScreen
+import io.alron.fixall.auth.presentation.registration.RegistrationScreen
 import io.alron.fixall.ui.theme.FixAllTheme
 
 @AndroidEntryPoint
@@ -20,15 +20,34 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FixAllTheme {
-                Scaffold(
-                    topBar = {
-                        AuthTopBar(
-                            modifier = Modifier
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController = navController,
+                    startDestination = AuthRoute.Login.route,
+                ) {
+                    composable(
+                        route = AuthRoute.Login.route
+                    ) {
+                        LoginScreen(
+                            onNavigateToRegistration = {
+                                navController.popBackStack()
+                                navController.navigate(AuthRoute.Registration.route)
+                            }
                         )
-                    },
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
-                    LoginScreen(modifier = Modifier.padding(innerPadding))
+                    }
+
+                    composable(
+                        route = AuthRoute.Registration.route
+                    ) {
+                        RegistrationScreen(
+                            onBackToLogin = {
+                                navController.popBackStack()
+                                navController.navigate(AuthRoute.Login.route)
+                            },
+                            onRegisterSuccess = { }
+                        )
+                    }
                 }
             }
         }

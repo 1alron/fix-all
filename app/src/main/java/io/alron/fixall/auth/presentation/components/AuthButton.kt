@@ -14,13 +14,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AuthButton(
     @StringRes stringRes: Int,
+    modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    isClickable: Boolean = true,
+    onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
-        enabled = !isLoading,
+        enabled = !isLoading && isClickable,
         shape = RoundedCornerShape(12.dp),
         modifier = modifier
     ) {

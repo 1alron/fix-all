@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import io.alron.fixall.R
+import io.alron.fixall.auth.presentation.util.UiText
 
 @Composable
 fun AuthTextField(
@@ -35,9 +37,12 @@ fun AuthTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     isPassword: Boolean = false,
-    @StringRes errorDescriptionRes: Int? = null,
+    error: UiText? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    val errorString = error?.asString()
 
     OutlinedTextField(
         value = value,
@@ -48,15 +53,16 @@ fun AuthTextField(
                 PasswordVisualTransformation()
             else
                 VisualTransformation.None,
-        isError = errorDescriptionRes != null,
-        keyboardOptions = KeyboardOptions(
+        isError = error != null,
+        keyboardOptions = keyboardOptions.copy(
             keyboardType = if (isPassword)
                 KeyboardType.Password
             else
-                KeyboardType.Text
+                keyboardOptions.keyboardType
         ),
+        keyboardActions = keyboardActions,
         supportingText = {
-            if (errorDescriptionRes != null) {
+            if (errorString != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -65,11 +71,11 @@ fun AuthTextField(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Warning,
-                        contentDescription = stringResource(errorDescriptionRes),
+                        contentDescription = errorString,
                         modifier = Modifier.size(16.dp).padding(end = 2.dp)
                     )
                     Text(
-                        text = stringResource(errorDescriptionRes),
+                        text = errorString,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
