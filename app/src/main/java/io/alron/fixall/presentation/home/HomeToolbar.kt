@@ -31,7 +31,7 @@ fun HomeToolbar(
     ) {
         Text(
             text = stringResource(R.string.general),
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.headlineSmall
         )
         IconButton(
             onClick = onIconClick,

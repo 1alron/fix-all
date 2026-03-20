@@ -18,10 +18,8 @@ class AuthManager(
     val isAuthorized: StateFlow<Boolean> = _isAuthorized
 
     init {
-        CoroutineScope(Dispatchers.IO).launch {
-            val token = tokenStorageRepository.getAccessToken()
-            _isAuthorized.value = !token.isNullOrEmpty()
-        }
+        val token = tokenStorageRepository.getAccessToken()
+        _isAuthorized.value = !token.isNullOrEmpty()
     }
 
     suspend fun login(username: String, password: String): LoginResult {
@@ -50,10 +48,10 @@ class AuthManager(
         return result
     }
 
-    suspend fun logout() {
+    fun logout() {
         tokenStorageRepository.clear()
         _isAuthorized.value = false
     }
 
-    suspend fun getAccessToken(): String? = tokenStorageRepository.getAccessToken()
+    fun getAccessToken(): String? = tokenStorageRepository.getAccessToken()
 }

@@ -25,21 +25,21 @@ class TokenStorageRepositoryImpl(private val context: Context) : TokenStorageRep
         )
     }
 
-    override suspend fun saveTokens(tokens: AuthTokens) {
+    override fun saveTokens(tokens: AuthTokens) {
         sharedPrefs.edit {
             putString("access_token", tokens.access)
             putString("refresh_token", tokens.refresh)
         }
     }
 
-    override suspend fun getAccessToken(): String? =
+    override fun getAccessToken(): String? =
         sharedPrefs.getString("access_token", null)
 
 
-    override suspend fun getRefreshToken(): String? =
+    override fun getRefreshToken(): String? =
         sharedPrefs.getString("refresh_token", null)
 
-    override suspend fun clear() {
+    override fun clear() {
         sharedPrefs.edit { clear() }
     }
 }
