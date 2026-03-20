@@ -35,4 +35,13 @@
     <string name="and">и</string>
     <string name="policy">Политикой конфиденциальности</string>
     <string name="terms_of_use">Условиями использования</string>
+
+    <string name="go_to_general">Перейти на главную</string>
+    <string name="go_to_branches">Перейти к филлиалам</string>
+    <string name="go_to_appointments">Перейти к заказам</string>
+    <string name="go_to_profile">Перейти в профиль</string>
+
+    <string name="general">Главная</string>
+    <string name="profile_icon">Иконка профиля</string>
+    <string name="logout">Выйти из аккаунта</string>
 </resources>
