@@ -13,8 +13,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
 import io.alron.fixall.domain.model.Branch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onToolbarIconClick: () -> Unit,
@@ -34,39 +39,47 @@ fun HomeScreen(
     val viewModel: HomeViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    when (val currentState = state) {
-        is HomeState.Content -> {
-            HomeScreenContent(
-                onLogout = { viewModel.logout() },
-                onToolbarIconClick = onToolbarIconClick,
-                branches = currentState.branches,
-                modifier = modifier
-            )
-        }
-
-        HomeState.Error -> {
-            Box(
-                Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Ошибка!")
+    PullToRefreshBox(
+        modifier = modifier.fillMaxSize(),
+        isRefreshing = state.isRefreshing,
+        onRefresh = { viewModel.refresh() },
+    ) {
+        when {
+            state.branches.isNotEmpty() -> {
+                HomeScreenContent(
+                    onLogout = { viewModel.logout() },
+                    onToolbarIconClick = onToolbarIconClick,
+                    branches = state.branches,
+                    modifier = modifier
+                )
             }
-        }
 
-        HomeState.Loading -> {
-            Box(
-                Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+            state.errorMessage != null -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Ошибка!")
+                }
+            }
+
+            state.isLoading -> {
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
         }
     }
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
     // Временно
@@ -78,7 +91,6 @@ fun HomeScreenContent(
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
             .padding(12.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -98,6 +110,7 @@ fun HomeScreenContent(
             Text(stringResource(R.string.logout))
         }
     }
+
 }
 
 @Composable

@@ -17,7 +17,7 @@ class HomeViewModel @Inject constructor(
     private val authManager: AuthManager
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<HomeState>(HomeState.Loading)
+    private val _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()
 
     init {
@@ -28,15 +28,33 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 _state.update {
-                    HomeState.Loading
+                    it.copy(isLoading = true, errorMessage = null)
                 }
                 val branches = branchesRepository.getBranches()
                 _state.update {
-                    HomeState.Content(branches)
+                    it.copy(isLoading = false, errorMessage = null, branches = branches)
                 }
             }.onFailure {
                 _state.update {
-                    HomeState.Error
+                    it.copy(isLoading = false, errorMessage = "Не удалось загрузить данные")
+                }
+            }
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(isRefreshing = true, errorMessage = null)
+            }
+            runCatching {
+                val branches = branchesRepository.getBranches()
+                _state.update {
+                    it.copy(isRefreshing = false, errorMessage = null, branches = branches)
+                }
+            }.onFailure {
+                _state.update {
+                    it.copy(isRefreshing = false, errorMessage = "Не удалось загрузить данные")
                 }
             }
         }
