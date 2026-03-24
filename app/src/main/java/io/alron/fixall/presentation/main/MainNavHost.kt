@@ -1,6 +1,9 @@
 package io.alron.fixall.presentation.main
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -27,6 +30,15 @@ fun MainNavHost() {
     val startDestination = MainRoute.Home
 
     Scaffold(
+        floatingActionButton = {
+            if (currentRoute == MainRoute.Home.name) {
+                FloatingActionButton(
+                    onClick = {  }
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Добавить")
+                }
+            }
+        },
         bottomBar = {
             NavigationBar(
                 windowInsets = NavigationBarDefaults.windowInsets,
@@ -68,10 +80,6 @@ fun MainNavHost() {
                         navController.navigate(MainRoute.Profile.name)
                     },
                 )
-            }
-
-            composable(MainRoute.Branches.name) {
-                Text("Branches")
             }
 
             composable(MainRoute.Appointments.name) {

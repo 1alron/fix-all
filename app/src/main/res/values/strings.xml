@@ -44,4 +44,9 @@
     <string name="general">Главная</string>
     <string name="profile_icon">Иконка профиля</string>
     <string name="logout">Выйти из аккаунта</string>
+    <string name="our_branches">Наши филиалы</string>
+
+    <string name="branch_image">Фото филиала</string>
+
+    <string name="how_service_works">Как работает сервис</string>
 </resources>
