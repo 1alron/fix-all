@@ -1,5 +1,6 @@
 package io.alron.fixall.presentation.home
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.pullToRefresh
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -33,7 +32,9 @@ import io.alron.fixall.domain.model.Branch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onToolbarIconClick: () -> Unit,
+    scrollState: ScrollState,
+    onBurgerIconClick: () -> Unit,
+    onAccountIconClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: HomeViewModel = hiltViewModel()
@@ -47,8 +48,10 @@ fun HomeScreen(
         when {
             state.branches.isNotEmpty() -> {
                 HomeScreenContent(
+                    scrollState = scrollState,
                     onLogout = { viewModel.logout() },
-                    onToolbarIconClick = onToolbarIconClick,
+                    onAccountIconClick = onAccountIconClick,
+                    onBurgerIconClick = onBurgerIconClick,
                     branches = state.branches,
                     modifier = modifier
                 )
@@ -85,17 +88,20 @@ fun HomeScreenContent(
     // Временно
     onLogout: () -> Unit,
 
-    onToolbarIconClick: () -> Unit,
+    scrollState: ScrollState,
+    onBurgerIconClick: () -> Unit,
+    onAccountIconClick: () -> Unit,
     branches: List<Branch>,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .padding(12.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
     ) {
         HomeToolbar(
-            onIconClick = onToolbarIconClick,
+            onBurgerIconClick = onBurgerIconClick,
+            onAccountIconClick = onAccountIconClick,
         )
         Spacer(Modifier.height(20.dp))
         ServiceInstructionContent(items = StepProvider.provideSteps())
@@ -109,8 +115,8 @@ fun HomeScreenContent(
         ) {
             Text(stringResource(R.string.logout))
         }
+        Spacer(Modifier.height(1000.dp))
     }
-
 }
 
 @Composable

@@ -9,6 +9,5 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class MainRoute(val icon: ImageVector) {
     Home(Icons.Default.Home),
-    Appointments(Icons.Default.Build),
     Profile(Icons.Default.AccountBox)
 }

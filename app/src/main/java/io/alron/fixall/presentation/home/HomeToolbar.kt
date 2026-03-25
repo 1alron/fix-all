@@ -1,16 +1,26 @@
 package io.alron.fixall.presentation.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,9 +29,11 @@ import androidx.compose.ui.unit.dp
 import io.alron.fixall.R
 import io.alron.fixall.presentation.theme.FixAllTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeToolbar(
-    onIconClick: () -> Unit,
+    onBurgerIconClick: () -> Unit,
+    onAccountIconClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -29,12 +41,20 @@ fun HomeToolbar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = stringResource(R.string.general),
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Default.Menu,
+                contentDescription = null,
+                modifier = Modifier.clickable { onBurgerIconClick() }
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.general),
+                style = MaterialTheme.typography.headlineSmall
+            )
+        }
         IconButton(
-            onClick = onIconClick,
+            onClick = onAccountIconClick,
         ) {
             Icon(
                 imageVector = Icons.Default.AccountCircle,
@@ -51,6 +71,9 @@ fun HomeToolbar(
 @Preview(showBackground = true)
 private fun Preview() {
     FixAllTheme {
-        HomeToolbar(onIconClick = { })
+        HomeToolbar(
+            onBurgerIconClick = { },
+            onAccountIconClick = { }
+        )
     }
 }
