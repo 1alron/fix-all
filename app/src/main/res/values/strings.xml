@@ -50,4 +50,7 @@
 
     <string name="how_service_works">Как работает сервис</string>
     <string name="create_appointment">Создать запись</string>
+
+    <string name="my_cars">Мои автомобили</string>
+    <string name="you_have_no_cars">У вас пока нет автомобилей!</string>
 </resources>

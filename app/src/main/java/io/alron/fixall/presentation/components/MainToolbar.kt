@@ -1,12 +1,10 @@
-package io.alron.fixall.presentation.home
+package io.alron.fixall.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -15,12 +13,9 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,7 +26,8 @@ import io.alron.fixall.presentation.theme.FixAllTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeToolbar(
+fun MainToolbar(
+    text: String,
     onBurgerIconClick: () -> Unit,
     onAccountIconClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -49,7 +45,7 @@ fun HomeToolbar(
             )
             Spacer(Modifier.width(12.dp))
             Text(
-                text = stringResource(R.string.general),
+                text = text,
                 style = MaterialTheme.typography.headlineSmall
             )
         }
@@ -71,7 +67,8 @@ fun HomeToolbar(
 @Preview(showBackground = true)
 private fun Preview() {
     FixAllTheme {
-        HomeToolbar(
+        MainToolbar(
+            text = stringResource(R.string.general),
             onBurgerIconClick = { },
             onAccountIconClick = { }
         )

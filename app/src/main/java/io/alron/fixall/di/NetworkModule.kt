@@ -28,70 +28,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    @Provides
-    @Singleton
-    fun providesBranchesApi(
-        retrofit: Retrofit
-    ): BranchesApi = retrofit.create(BranchesApi::class.java)
-
-    @Provides
-    fun providesBranchesRepository(
-        branchesApi: BranchesApi
-    ): BranchesRepository = BranchesRepositoryImpl(branchesApi)
-
-    @Provides
-    @Singleton
-    @Named("auth")
-    fun provideAuthOkHttp(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    @Named("auth")
-    fun provideAuthRetrofit(
-        @Named("auth") okHttpClient: OkHttpClient
-    ): Retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.BASE_URL)
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    @Provides
-    @Singleton
-    @Named("auth")
-    fun provideAuthApi(
-        @Named("auth") retrofit: Retrofit
-    ): AuthApi =
-        retrofit.create(AuthApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideTokenStorage(@ApplicationContext context: Context): TokenStorageRepository =
-        TokenStorageRepositoryImpl(context)
 
     @Provides
     @Singleton
     fun provideGson() = Gson()
-
-    @Provides
-    fun provideAuthRepository(
-        @Named("auth") api: AuthApi,
-        tokenStorageRepository: TokenStorageRepository,
-        gson: Gson
-    ): AuthRepository =
-        AuthRepositoryImpl(api, tokenStorageRepository, gson)
-
-    @Provides
-    @Singleton
-    fun provideAuthManager(
-        repository: AuthRepository,
-        tokenStorageRepository: TokenStorageRepository
-    ): AuthManager = AuthManager(
-        authRepository = repository,
-        tokenStorageRepository = tokenStorageRepository
-    )
 
     @Provides
     @Singleton

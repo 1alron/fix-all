@@ -3,18 +3,11 @@ package io.alron.fixall.presentation.main
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,15 +30,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import io.alron.fixall.R
 import io.alron.fixall.presentation.MainRoute
+import io.alron.fixall.presentation.ModalDrawerRoute
+import io.alron.fixall.presentation.cars.CarsFloatingActionButton
+import io.alron.fixall.presentation.cars.CarsScreen
 import io.alron.fixall.presentation.home.HomeFloatingActionButton
 import io.alron.fixall.presentation.home.HomeScreen
 import kotlinx.coroutines.launch
@@ -79,6 +71,17 @@ fun MainNavHost() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    fun navigateWithModalDrawer(
+        route: String
+    ) {
+        scope.launch {
+            drawerState.close()
+            navController.navigate(route) {
+                launchSingleTop = true
+            }
+        }
+    }
+
     LaunchedEffect(scrollState.value) {
         isScrollingDown = scrollState.value > lastScrollValue
         lastScrollValue = scrollState.value
@@ -87,16 +90,14 @@ fun MainNavHost() {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                Text("Drawer title", modifier = Modifier.padding(16.dp))
-                HorizontalDivider()
-                NavigationDrawerItem(
-                    label = { Text(text = "Drawer Item") },
-                    selected = false,
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier.padding(4.dp)
-                )
-            }
+            ModalDrawerContent(
+                onHomeClick = {
+                    navigateWithModalDrawer(MainRoute.Home.name)
+                },
+                onCarsClick = {
+                    navigateWithModalDrawer(ModalDrawerRoute.Cars.name)
+                }
+            )
         }
     ) {
         Scaffold(
@@ -107,9 +108,13 @@ fun MainNavHost() {
                         fabTextAlpha = fabTextAlpha
                     )
                 }
+
+                if (currentRoute == ModalDrawerRoute.Cars.name) {
+                    CarsFloatingActionButton()
+                }
             },
             bottomBar = {
-                if (!isScrollingDown) {
+                if (currentRoute == MainRoute.Home.name && !isScrollingDown) {
                     NavigationBar(
                         modifier = Modifier
                             .offset(y = bottomBarOffset)
@@ -163,7 +168,20 @@ fun MainNavHost() {
                 composable(MainRoute.Profile.name) {
                     Text("Profile")
                 }
+
+                composable(ModalDrawerRoute.Cars.name) {
+                    CarsScreen(
+                        onAccountIconClick = {
+                            navController.navigate(MainRoute.Profile.name)
+                        },
+                        onBurgerIconClick = {
+                            scope.launch { drawerState.open() }
+                        },
+                    )
+                }
             }
         }
     }
 }
+
+

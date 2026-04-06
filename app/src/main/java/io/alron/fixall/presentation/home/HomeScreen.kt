@@ -28,6 +28,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
 import io.alron.fixall.domain.model.Branch
+import io.alron.fixall.presentation.components.MainToolbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,11 +62,12 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(12.dp)
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text("Ошибка!")
+                    Text(state.errorMessage!!)
                 }
             }
 
@@ -99,7 +101,8 @@ fun HomeScreenContent(
             .padding(12.dp)
             .verticalScroll(scrollState)
     ) {
-        HomeToolbar(
+        MainToolbar(
+            text = stringResource(R.string.general),
             onBurgerIconClick = onBurgerIconClick,
             onAccountIconClick = onAccountIconClick,
         )
