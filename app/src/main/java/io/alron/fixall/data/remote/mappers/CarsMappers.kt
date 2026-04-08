@@ -5,9 +5,12 @@ import io.alron.fixall.domain.model.Car
 
 fun CarDto.toDomain() = Car(
     id = id,
-    model = model,
+    modelId = model,
+    modelName = model_name,
+    brandName = brand_name,
     year = year,
     licensePlate = license_plate,
     vin = vin,
-    photoUrl = photo
+    photo = photo,
+    photoUrl = photo_url
 )
