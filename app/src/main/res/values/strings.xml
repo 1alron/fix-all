@@ -53,4 +53,9 @@
 
     <string name="my_cars">Мои автомобили</string>
     <string name="you_have_no_cars">У вас пока нет автомобилей!</string>
+    <string name="add_car">Добавить автомобиль</string>
+    <string name="add_first_car_description">Добавьте свой первый автомобиль, чтобы записываться на сервис</string>
+    <string name="year_of_manufacture">Год выпуска: %1$d</string>
+    <string name="edit">Изменить</string>
+    <string name="delete">Удалить</string>
 </resources>
