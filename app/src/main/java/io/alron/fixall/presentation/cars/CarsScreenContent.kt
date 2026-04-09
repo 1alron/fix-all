@@ -49,12 +49,9 @@ import coil.compose.AsyncImage
 import io.alron.fixall.BuildConfig
 import io.alron.fixall.R
 import io.alron.fixall.domain.model.Car
-import io.alron.fixall.presentation.components.MainToolbar
 
 @Composable
 fun CarsScreenContent(
-    onAccountIconClick: () -> Unit,
-    onBurgerIconClick: () -> Unit,
     onAddCarClick: () -> Unit,
     onEditCarClick: (Car) -> Unit,
     onDeleteCar: (String) -> Unit,
@@ -92,13 +89,7 @@ fun CarsScreenContent(
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        MainToolbar(
-            text = stringResource(R.string.my_cars),
-            onBurgerIconClick = onBurgerIconClick,
-            onAccountIconClick = onAccountIconClick
-        )
-        
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
         
         if (cars.isNotEmpty()) {
             CarsContent(
@@ -106,18 +97,6 @@ fun CarsScreenContent(
                 onEditClick = onEditCarClick,
                 onDeleteClick = { carToDelete = it }
             )
-            
-            Spacer(Modifier.height(24.dp))
-            
-            Button(
-                onClick = onAddCarClick,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.add_car))
-            }
         } else {
             EmptyCarsContent(onAddCarClick = onAddCarClick)
         }

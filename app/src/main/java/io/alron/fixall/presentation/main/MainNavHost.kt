@@ -11,10 +11,6 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -57,11 +53,6 @@ fun MainNavHost() {
     var lastScrollValue by remember { mutableIntStateOf(0) }
     var isScrollingDown by remember { mutableStateOf(false) }
 
-    val bottomBarOffset by animateDpAsState(
-        targetValue = if (isScrollingDown) 72.dp else 0.dp,
-        animationSpec = tween(durationMillis = 300),
-        label = ""
-    )
     val fabWidth by animateDpAsState(
         targetValue = if (isScrollingDown) 56.dp else 180.dp,
         animationSpec = tween(durationMillis = 300),
@@ -120,40 +111,6 @@ fun MainNavHost() {
                             navController.navigate(MainRoute.AddCar.name)
                         }
                     )
-                }
-            },
-            bottomBar = {
-                if (currentRoute == MainRoute.Home.name && !isScrollingDown) {
-                    NavigationBar(
-                        modifier = Modifier
-                            .offset(y = bottomBarOffset)
-                            .fillMaxWidth(),
-                        windowInsets = NavigationBarDefaults.windowInsets,
-                    ) {
-                        MainRoute.entries.filter { it.icon != null }.forEachIndexed { _, destination ->
-                            NavigationBarItem(
-                                selected = currentRoute == destination.name,
-                                onClick = {
-                                    navController.navigate(destination.name) {
-                                        popUpTo(startDestination.name) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                    }
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = destination.icon!!,
-                                        contentDescription = null
-                                    )
-                                },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            )
-                        }
-                    }
                 }
             }
         ) { innerPadding ->

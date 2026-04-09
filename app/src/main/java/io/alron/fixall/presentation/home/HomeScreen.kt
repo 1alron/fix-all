@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -41,42 +42,51 @@ fun HomeScreen(
     val viewModel: HomeViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    PullToRefreshBox(
-        modifier = modifier.fillMaxSize(),
-        isRefreshing = state.isRefreshing,
-        onRefresh = { viewModel.refresh() },
-    ) {
-        when {
-            state.branches.isNotEmpty() -> {
-                HomeScreenContent(
-                    scrollState = scrollState,
-                    onLogout = { viewModel.logout() },
-                    onAccountIconClick = onAccountIconClick,
-                    onBurgerIconClick = onBurgerIconClick,
-                    branches = state.branches,
-                    modifier = modifier
-                )
-            }
-
-            state.errorMessage != null -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(state.errorMessage!!)
+    Scaffold(
+        topBar = {
+            MainToolbar(
+                title = stringResource(R.string.general),
+                onNavigationIconClick = onBurgerIconClick,
+                onActionIconClick = onAccountIconClick
+            )
+        }
+    ) { innerPadding ->
+        PullToRefreshBox(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            isRefreshing = state.isRefreshing,
+            onRefresh = { viewModel.refresh() },
+        ) {
+            when {
+                state.branches.isNotEmpty() -> {
+                    HomeScreenContent(
+                        scrollState = scrollState,
+                        onLogout = { viewModel.logout() },
+                        branches = state.branches
+                    )
                 }
-            }
 
-            state.isLoading -> {
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+                state.errorMessage != null -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(state.errorMessage!!)
+                    }
+                }
+
+                state.isLoading -> {
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }
@@ -84,41 +94,32 @@ fun HomeScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
-    // Временно
     onLogout: () -> Unit,
-
     scrollState: ScrollState,
-    onBurgerIconClick: () -> Unit,
-    onAccountIconClick: () -> Unit,
     branches: List<Branch>,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
-            .padding(12.dp)
+            .fillMaxSize()
             .verticalScroll(scrollState)
+            .padding(16.dp)
     ) {
-        MainToolbar(
-            text = stringResource(R.string.general),
-            onBurgerIconClick = onBurgerIconClick,
-            onAccountIconClick = onAccountIconClick,
-        )
-        Spacer(Modifier.height(20.dp))
         ServiceInstructionContent(items = StepProvider.provideSteps())
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
         BranchesContent(
             branches = branches
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(24.dp))
         Button(
-            onClick = onLogout
+            onClick = onLogout,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text(stringResource(R.string.logout))
         }
-        Spacer(Modifier.height(1000.dp))
+        Spacer(Modifier.height(32.dp))
     }
 }
 
@@ -128,11 +129,12 @@ fun ServiceInstructionContent(
 ) {
     Text(
         text = stringResource(R.string.how_service_works),
-        style = MaterialTheme.typography.titleLarge
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
     )
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(12.dp))
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         itemsIndexed(items) { _, item ->
             StepRowItem(item)

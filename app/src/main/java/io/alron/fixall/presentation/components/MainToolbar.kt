@@ -1,12 +1,6 @@
 package io.alron.fixall.presentation.components
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Menu
@@ -15,62 +9,57 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import io.alron.fixall.R
-import io.alron.fixall.presentation.theme.FixAllTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainToolbar(
-    text: String,
-    onBurgerIconClick: () -> Unit,
-    onAccountIconClick: () -> Unit,
-    modifier: Modifier = Modifier
+    title: String,
+    onNavigationIconClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    navigationIcon: ImageVector = Icons.Default.Menu,
+    onActionIconClick: (() -> Unit)? = null,
+    actionIcon: ImageVector = Icons.Default.AccountCircle
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Menu,
-                contentDescription = null,
-                modifier = Modifier.clickable { onBurgerIconClick() }
-            )
-            Spacer(Modifier.width(12.dp))
+    TopAppBar(
+        modifier = modifier,
+        title = {
             Text(
-                text = text,
-                style = MaterialTheme.typography.headlineSmall
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
             )
-        }
-        IconButton(
-            onClick = onAccountIconClick,
-        ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = stringResource(R.string.profile_icon),
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .size(36.dp)
-            )
-        }
-    }
-}
-
-@Composable
-@Preview(showBackground = true)
-private fun Preview() {
-    FixAllTheme {
-        MainToolbar(
-            text = stringResource(R.string.general),
-            onBurgerIconClick = { },
-            onAccountIconClick = { }
-        )
-    }
+        },
+        navigationIcon = {
+            IconButton(onClick = onNavigationIconClick) {
+                Icon(
+                    imageVector = navigationIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        },
+        actions = {
+            if (onActionIconClick != null) {
+                IconButton(onClick = onActionIconClick) {
+                    Icon(
+                        imageVector = actionIcon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        windowInsets = TopAppBarDefaults.windowInsets
+    )
 }

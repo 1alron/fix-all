@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -18,10 +19,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.alron.fixall.R
 import io.alron.fixall.domain.model.Car
+import io.alron.fixall.presentation.components.MainToolbar
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,44 +55,54 @@ fun CarsScreen(
         }
     }
 
-    PullToRefreshBox(
-        modifier = modifier.fillMaxSize(),
-        isRefreshing = state.isRefreshing,
-        onRefresh = { viewModel.refresh() },
-    ) {
-        when {
-            state.errorMessage != null -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(state.errorMessage!!)
+    Scaffold(
+        topBar = {
+            MainToolbar(
+                title = stringResource(R.string.my_cars),
+                onNavigationIconClick = onBurgerIconClick,
+                onActionIconClick = onAccountIconClick
+            )
+        }
+    ) { innerPadding ->
+        PullToRefreshBox(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            isRefreshing = state.isRefreshing,
+            onRefresh = { viewModel.refresh() },
+        ) {
+            when {
+                state.errorMessage != null -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(state.errorMessage!!)
+                    }
                 }
-            }
 
-            state.isLoading -> {
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+                state.isLoading -> {
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
-            }
 
-            else -> {
-                CarsScreenContent(
-                    onAccountIconClick = onAccountIconClick,
-                    onBurgerIconClick = onBurgerIconClick,
-                    onAddCarClick = onAddCarClick,
-                    onEditCarClick = onEditCarClick,
-                    onDeleteCar = { id -> viewModel.deleteCar(id) },
-                    cars = state.cars,
-                    modifier = modifier
-                )
+                else -> {
+                    CarsScreenContent(
+                        onAddCarClick = onAddCarClick,
+                        onEditCarClick = onEditCarClick,
+                        onDeleteCar = { id -> viewModel.deleteCar(id) },
+                        cars = state.cars,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
     }
