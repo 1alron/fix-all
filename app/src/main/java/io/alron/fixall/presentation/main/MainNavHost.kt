@@ -8,16 +8,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -31,12 +28,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.google.gson.Gson
+import io.alron.fixall.domain.model.Car
 import io.alron.fixall.presentation.MainRoute
 import io.alron.fixall.presentation.ModalDrawerRoute
+import io.alron.fixall.presentation.cars.AddCarScreen
 import io.alron.fixall.presentation.cars.CarsFloatingActionButton
 import io.alron.fixall.presentation.cars.CarsScreen
 import io.alron.fixall.presentation.home.HomeFloatingActionButton
@@ -57,15 +59,18 @@ fun MainNavHost() {
 
     val bottomBarOffset by animateDpAsState(
         targetValue = if (isScrollingDown) 72.dp else 0.dp,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 300),
+        label = ""
     )
     val fabWidth by animateDpAsState(
         targetValue = if (isScrollingDown) 56.dp else 180.dp,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 300),
+        label = ""
     )
     val fabTextAlpha by animateFloatAsState(
         targetValue = if (isScrollingDown) 0f else 1f,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 300),
+        label = ""
     )
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -110,7 +115,11 @@ fun MainNavHost() {
                 }
 
                 if (currentRoute == ModalDrawerRoute.Cars.name) {
-                    CarsFloatingActionButton()
+                    CarsFloatingActionButton(
+                        onClick = {
+                            navController.navigate(MainRoute.AddCar.name)
+                        }
+                    )
                 }
             },
             bottomBar = {
@@ -121,7 +130,7 @@ fun MainNavHost() {
                             .fillMaxWidth(),
                         windowInsets = NavigationBarDefaults.windowInsets,
                     ) {
-                        MainRoute.entries.forEachIndexed { _, destination ->
+                        MainRoute.entries.filter { it.icon != null }.forEachIndexed { _, destination ->
                             NavigationBarItem(
                                 selected = currentRoute == destination.name,
                                 onClick = {
@@ -134,7 +143,7 @@ fun MainNavHost() {
                                 },
                                 icon = {
                                     Icon(
-                                        imageVector = destination.icon,
+                                        imageVector = destination.icon!!,
                                         contentDescription = null
                                     )
                                 },
@@ -177,11 +186,38 @@ fun MainNavHost() {
                         onBurgerIconClick = {
                             scope.launch { drawerState.open() }
                         },
+                        onAddCarClick = {
+                            navController.navigate(MainRoute.AddCar.name)
+                        },
+                        onEditCarClick = { car ->
+                            val carJson = Gson().toJson(car)
+                            navController.navigate(MainRoute.AddCar.name + "?car=${carJson}")
+                        }
+                    )
+                }
+
+                composable(
+                    route = MainRoute.AddCar.name + "?car={car}",
+                    arguments = listOf(
+                        navArgument("car") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        }
+                    )
+                ) { backStackEntry ->
+                    val carJson = backStackEntry.arguments?.getString("car")
+                    val car = carJson?.let { Gson().fromJson(it, Car::class.java) }
+                    
+                    AddCarScreen(
+                        onBack = { navController.popBackStack() },
+                        onSuccess = {
+                            navController.popBackStack()
+                        },
+                        initialCar = car
                     )
                 }
             }
         }
     }
 }
-
-

@@ -57,5 +57,26 @@
     <string name="add_first_car_description">Добавьте свой первый автомобиль, чтобы записываться на сервис</string>
     <string name="year_of_manufacture">Год выпуска: %1$d</string>
     <string name="edit">Изменить</string>
+    <string name="edit_car">Изменить автомобиль</string>
     <string name="delete">Удалить</string>
+
+    <string name="delete_car_title">Удалить автомобиль?</string>
+    <string name="delete_car_message">Вы уверены, что хотите удалить этот автомобиль? Это действие нельзя будет отменить.</string>
+    <string name="cancel">Отмена</string>
+
+    <string name="invalid_year">Год должен быть не менее 1900 и не более текущего</string>
+    <string name="invalid_license_plate">Неверный формат гос. номера</string>
+    <string name="invalid_vin">Неверный формат VIN-кода (17 символов)</string>
+
+    <string name="photo">Фото</string>
+    <string name="brand">Марка</string>
+    <string name="model">Модель</string>
+    <string name="creating_year">Год выпуска</string>
+    <string name="license_plate">Гос. номер</string>
+    <string name="vin">VIN (необязательно)</string>
+
+    <string name="save_changes">Сохранить изменения</string>
+    <string name="save_car">Сохранить автомобиль</string>
+
+    <string name="car_updated_successfully">Автомобиль успешно обновлен</string>
 </resources>

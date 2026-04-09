@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,7 +31,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,9 +55,37 @@ import io.alron.fixall.presentation.components.MainToolbar
 fun CarsScreenContent(
     onAccountIconClick: () -> Unit,
     onBurgerIconClick: () -> Unit,
+    onAddCarClick: () -> Unit,
+    onEditCarClick: (Car) -> Unit,
+    onDeleteCar: (String) -> Unit,
     cars: List<Car>,
     modifier: Modifier = Modifier
 ) {
+    var carToDelete by remember { mutableStateOf<Car?>(null) }
+
+    if (carToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { carToDelete = null },
+            title = { Text(stringResource(R.string.delete_car_title)) },
+            text = { Text(stringResource(R.string.delete_car_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDeleteCar(carToDelete!!.id)
+                        carToDelete = null
+                    }
+                ) {
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { carToDelete = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -67,12 +101,16 @@ fun CarsScreenContent(
         Spacer(Modifier.height(24.dp))
         
         if (cars.isNotEmpty()) {
-            CarsContent(cars = cars)
+            CarsContent(
+                cars = cars,
+                onEditClick = onEditCarClick,
+                onDeleteClick = { carToDelete = it }
+            )
             
             Spacer(Modifier.height(24.dp))
             
             Button(
-                onClick = { /* TODO */ },
+                onClick = onAddCarClick,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -81,7 +119,7 @@ fun CarsScreenContent(
                 Text(stringResource(R.string.add_car))
             }
         } else {
-            EmptyCarsContent()
+            EmptyCarsContent(onAddCarClick = onAddCarClick)
         }
         
         Spacer(Modifier.height(32.dp))
@@ -89,7 +127,7 @@ fun CarsScreenContent(
 }
 
 @Composable
-fun EmptyCarsContent() {
+fun EmptyCarsContent(onAddCarClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -136,7 +174,7 @@ fun EmptyCarsContent() {
         Spacer(Modifier.height(32.dp))
         
         Button(
-            onClick = { /* TODO */ },
+            onClick = onAddCarClick,
             shape = RoundedCornerShape(12.dp)
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
@@ -149,6 +187,8 @@ fun EmptyCarsContent() {
 @Composable
 fun CarsContent(
     cars: List<Car>,
+    onEditClick: (Car) -> Unit,
+    onDeleteClick: (Car) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -156,13 +196,21 @@ fun CarsContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         cars.forEach { car ->
-            CarItem(car = car)
+            CarItem(
+                car = car,
+                onEditClick = { onEditClick(car) },
+                onDeleteClick = { onDeleteClick(car) }
+            )
         }
     }
 }
 
 @Composable
-fun CarItem(car: Car) {
+fun CarItem(
+    car: Car,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -262,7 +310,7 @@ fun CarItem(car: Car) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
-                        onClick = { /* TODO: Edit car */ },
+                        onClick = onEditClick,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(40.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
@@ -287,7 +335,7 @@ fun CarItem(car: Car) {
                     }
 
                     OutlinedButton(
-                        onClick = { /* TODO: Delete car */ },
+                        onClick = onDeleteClick,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(40.dp),
                         colors = ButtonDefaults.outlinedButtonColors(

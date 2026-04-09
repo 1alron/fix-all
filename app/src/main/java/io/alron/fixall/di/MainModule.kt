@@ -1,8 +1,11 @@
 package io.alron.fixall.di
 
+import android.content.Context
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.alron.fixall.data.remote.api.BranchesApi
 import io.alron.fixall.data.remote.api.CarsApi
@@ -35,6 +38,8 @@ object MainModule {
 
     @Provides
     fun providesCarsRepository(
-        carsApi: CarsApi
-    ): CarsRepository = CarsRepositoryImpl(carsApi)
+        carsApi: CarsApi,
+        @ApplicationContext context: Context,
+        gson: Gson
+    ): CarsRepository = CarsRepositoryImpl(carsApi, context, gson)
 }

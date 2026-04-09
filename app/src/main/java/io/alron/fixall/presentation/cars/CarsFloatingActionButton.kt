@@ -9,10 +9,11 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun CarsFloatingActionButton(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     FloatingActionButton(
-        onClick = {},
+        onClick = onClick,
         modifier = modifier
     ) {
         Icon(
