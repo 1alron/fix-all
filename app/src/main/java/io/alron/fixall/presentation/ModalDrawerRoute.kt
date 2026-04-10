@@ -1,10 +1,14 @@
 package io.alron.fixall.presentation
 
-import androidx.annotation.DrawableRes
-import io.alron.fixall.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class ModalDrawerRoute(
-    @DrawableRes val iconRes: Int
+    val icon: ImageVector
 ) {
-    Cars(R.drawable.ic_car),
+    Cars(Icons.Default.Settings), // Using Settings as a placeholder if DirectionsCar is missing
+    ServiceCenters(Icons.Default.Place)
 }

@@ -39,6 +39,8 @@ import io.alron.fixall.presentation.cars.CarsFloatingActionButton
 import io.alron.fixall.presentation.cars.CarsScreen
 import io.alron.fixall.presentation.home.HomeFloatingActionButton
 import io.alron.fixall.presentation.home.HomeScreen
+import io.alron.fixall.presentation.service_centers.ServiceCentersScreen
+import io.alron.fixall.presentation.service_centers.details.ServiceCenterDetailsScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -87,11 +89,15 @@ fun MainNavHost() {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerContent(
+                currentRoute = currentRoute,
                 onHomeClick = {
                     navigateWithModalDrawer(MainRoute.Home.name)
                 },
                 onCarsClick = {
                     navigateWithModalDrawer(ModalDrawerRoute.Cars.name)
+                },
+                onServiceCentersClick = {
+                    navigateWithModalDrawer(ModalDrawerRoute.ServiceCenters.name)
                 }
             )
         }
@@ -150,6 +156,29 @@ fun MainNavHost() {
                             val carJson = Gson().toJson(car)
                             navController.navigate(MainRoute.AddCar.name + "?car=${carJson}")
                         }
+                    )
+                }
+
+                composable(ModalDrawerRoute.ServiceCenters.name) {
+                    ServiceCentersScreen(
+                        onBurgerIconClick = {
+                            scope.launch { drawerState.open() }
+                        },
+                        onAccountIconClick = {
+                            navController.navigate(MainRoute.Profile.name)
+                        },
+                        onServiceCenterClick = { id ->
+                            navController.navigate("service_center_details/$id")
+                        }
+                    )
+                }
+
+                composable(
+                    route = "service_center_details/{id}",
+                    arguments = listOf(navArgument("id") { type = NavType.StringType })
+                ) {
+                    ServiceCenterDetailsScreen(
+                        onBack = { navController.popBackStack() }
                     )
                 }
 

@@ -79,4 +79,8 @@
     <string name="save_car">Сохранить автомобиль</string>
 
     <string name="car_updated_successfully">Автомобиль успешно обновлен</string>
+
+    <string name="open">Открыто</string>
+    <string name="closed">Закрыто</string>
+    <string name="leave_review">Оставить отзыв</string>
 </resources>

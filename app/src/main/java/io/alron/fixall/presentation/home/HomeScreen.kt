@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
-import io.alron.fixall.domain.model.Branch
 import io.alron.fixall.presentation.components.MainToolbar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,37 +57,10 @@ fun HomeScreen(
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.refresh() },
         ) {
-            when {
-                state.branches.isNotEmpty() -> {
-                    HomeScreenContent(
-                        scrollState = scrollState,
-                        onLogout = { viewModel.logout() },
-                        branches = state.branches
-                    )
-                }
-
-                state.errorMessage != null -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(state.errorMessage!!)
-                    }
-                }
-
-                state.isLoading -> {
-                    Box(
-                        Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
+            HomeScreenContent(
+                scrollState = scrollState,
+                onLogout = { viewModel.logout() }
+            )
         }
     }
 }
@@ -98,7 +70,6 @@ fun HomeScreen(
 fun HomeScreenContent(
     onLogout: () -> Unit,
     scrollState: ScrollState,
-    branches: List<Branch>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -108,10 +79,6 @@ fun HomeScreenContent(
             .padding(16.dp)
     ) {
         ServiceInstructionContent(items = StepProvider.provideSteps())
-        Spacer(Modifier.height(24.dp))
-        BranchesContent(
-            branches = branches
-        )
         Spacer(Modifier.height(24.dp))
         Button(
             onClick = onLogout,
