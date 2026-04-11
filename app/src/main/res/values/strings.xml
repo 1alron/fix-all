@@ -83,4 +83,22 @@
     <string name="open">Открыто</string>
     <string name="closed">Закрыто</string>
     <string name="leave_review">Оставить отзыв</string>
+
+    <string name="ok">ОК</string>
+    <string name="new_appointment">Новая запись</string>
+    <string name="select_service_center">Выберите сервисный центр</string>
+    <string name="select_branch">Выберите филиал</string>
+    <string name="select_service">Выберите услугу</string>
+    <string name="select_car">Выберите автомобиль</string>
+    <string name="have_no_cars_add">У вас нет автомобилей. Добавить?</string>
+    <string name="add_new_car">+ Добавить новый автомобиль</string>
+    <string name="select_date">Выберите дату</string>
+    <string name="select_time">Выберите время</string>
+    <string name="no_slots_available_for_date">Нет доступных слотов на эту дату</string>
+    <string name="comment">Комментарий</string>
+    <string name="type_something_important">Напишите что-нибудь важное...</string>
+    <string name="confirm_appointment">Подтвердить запись</string>
+
+    <string name="you_have_no_appointments">У вас пока нет записей</string>
+    <string name="appoint_to_service_centers">Запишитесь на обслуживание в один из наших сервисных центров</string>
 </resources>

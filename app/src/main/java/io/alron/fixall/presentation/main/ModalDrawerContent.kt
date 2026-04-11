@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.HorizontalDivider
@@ -31,6 +32,7 @@ fun ModalDrawerContent(
     onHomeClick: () -> Unit,
     onCarsClick: () -> Unit,
     onServiceCentersClick: () -> Unit,
+    onAppointmentsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ModalDrawerSheet(
@@ -61,7 +63,6 @@ fun ModalDrawerContent(
             onClick = onHomeClick,
             modifier = Modifier.padding(4.dp)
         )
-        HorizontalDivider()
         NavigationDrawerItem(
             icon = { Icon(painterResource(R.drawable.ic_car), contentDescription = null) },
             label = { Text(stringResource(R.string.my_cars)) },
@@ -74,6 +75,14 @@ fun ModalDrawerContent(
             label = { Text(stringResource(R.string.our_branches)) },
             selected = currentRoute == ModalDrawerRoute.ServiceCenters.name,
             onClick = onServiceCentersClick,
+            modifier = Modifier.padding(4.dp)
+        )
+        HorizontalDivider()
+        NavigationDrawerItem(
+            icon = { Icon(Icons.Default.DateRange, contentDescription = null) },
+            label = { Text(stringResource(R.string.go_to_appointments)) },
+            selected = currentRoute == ModalDrawerRoute.Appointments.name,
+            onClick = onAppointmentsClick,
             modifier = Modifier.padding(4.dp)
         )
     }

@@ -3,13 +3,9 @@ package io.alron.fixall.presentation.main
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +30,9 @@ import com.google.gson.Gson
 import io.alron.fixall.domain.model.Car
 import io.alron.fixall.presentation.MainRoute
 import io.alron.fixall.presentation.ModalDrawerRoute
+import io.alron.fixall.presentation.appointments.AppointmentsListScreen
+import io.alron.fixall.presentation.appointments.create.CreateAppointmentScreen
+import io.alron.fixall.presentation.appointments.details.AppointmentDetailsScreen
 import io.alron.fixall.presentation.cars.AddCarScreen
 import io.alron.fixall.presentation.cars.CarsFloatingActionButton
 import io.alron.fixall.presentation.cars.CarsScreen
@@ -98,6 +97,9 @@ fun MainNavHost() {
                 },
                 onServiceCentersClick = {
                     navigateWithModalDrawer(ModalDrawerRoute.ServiceCenters.name)
+                },
+                onAppointmentsClick = {
+                    navigateWithModalDrawer(ModalDrawerRoute.Appointments.name)
                 }
             )
         }
@@ -132,6 +134,9 @@ fun MainNavHost() {
                         },
                         onBurgerIconClick = {
                             scope.launch { drawerState.open() }
+                        },
+                        onAddAppointmentClick = {
+                            navController.navigate("create_appointment")
                         },
                         scrollState = scrollState
                     )
@@ -182,6 +187,32 @@ fun MainNavHost() {
                     )
                 }
 
+                composable(ModalDrawerRoute.Appointments.name) {
+                    AppointmentsListScreen(
+                        onBurgerIconClick = { scope.launch { drawerState.open() } },
+                        onAccountIconClick = { navController.navigate(MainRoute.Profile.name) },
+                        onAddAppointmentClick = { navController.navigate("create_appointment") },
+                        onAppointmentClick = { id -> navController.navigate("appointment_details/$id") }
+                    )
+                }
+
+                composable(
+                    route = "appointment_details/{id}",
+                    arguments = listOf(navArgument("id") { type = NavType.StringType })
+                ) {
+                    AppointmentDetailsScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable("create_appointment") {
+                    CreateAppointmentScreen(
+                        onBack = { navController.popBackStack() },
+                        onNavigateToAddCar = { navController.navigate(MainRoute.AddCar.name) },
+                        onSuccess = { navController.popBackStack() }
+                    )
+                }
+
                 composable(
                     route = MainRoute.AddCar.name + "?car={car}",
                     arguments = listOf(
@@ -194,7 +225,7 @@ fun MainNavHost() {
                 ) { backStackEntry ->
                     val carJson = backStackEntry.arguments?.getString("car")
                     val car = carJson?.let { Gson().fromJson(it, Car::class.java) }
-                    
+
                     AddCarScreen(
                         onBack = { navController.popBackStack() },
                         onSuccess = {
