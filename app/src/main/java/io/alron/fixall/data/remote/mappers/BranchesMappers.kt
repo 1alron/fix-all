@@ -50,5 +50,6 @@ fun ReviewDto.toDomain() = Review(
     rating = rating,
     comment = comment,
     adminReply = adminReply,
+    adminReplyAt = adminReplyAt,
     createdAt = createdAt
 )

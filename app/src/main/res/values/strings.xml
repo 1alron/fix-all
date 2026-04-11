@@ -37,13 +37,13 @@
     <string name="terms_of_use">Условиями использования</string>
 
     <string name="go_to_general">Перейти на главную</string>
-    <string name="go_to_branches">Перейти к филлиалам</string>
-    <string name="go_to_appointments">Перейти к заказам</string>
+    <string name="my_appointments">Мои заказы</string>
     <string name="go_to_profile">Перейти в профиль</string>
 
     <string name="general">Главная</string>
     <string name="profile_icon">Иконка профиля</string>
     <string name="logout">Выйти из аккаунта</string>
+    <string name="branches">Филиалы</string>
     <string name="our_branches">Наши филиалы</string>
 
     <string name="branch_image">Фото филиала</string>
@@ -101,4 +101,12 @@
 
     <string name="you_have_no_appointments">У вас пока нет записей</string>
     <string name="appoint_to_service_centers">Запишитесь на обслуживание в один из наших сервисных центров</string>
+
+    <string name="reviews">Отзывы</string>
+    <string name="no_reviews_yet">Отзывов пока нет</string>
+
+    <string name="your_rating">Ваша оценка:</string>
+    <string name="min_20_chars">Минимум 20 символов</string>
+    <string name="send">Отправить</string>
+    <string name="admin_response">Ответ администратора</string>
 </resources>

@@ -56,6 +56,7 @@ import java.util.Locale
 @Composable
 fun ServiceCenterDetailsScreen(
     onBack: () -> Unit,
+    onShowReviewsClick: (String) -> Unit,
     viewModel: ServiceCenterDetailsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -118,8 +119,11 @@ fun ServiceCenterDetailsScreen(
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold
                             )
-                            if (branch.averageRating > 0) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (branch.averageRating > 0 || branch.reviewsCount >= 0) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.clickable { onShowReviewsClick(branch.id) }
+                                ) {
                                     Icon(
                                         Icons.Default.Star,
                                         contentDescription = null,
@@ -135,7 +139,8 @@ fun ServiceCenterDetailsScreen(
                                                 branch.averageRating
                                             )
                                         } (${branch.reviewsCount} отзывов)",
-                                        style = MaterialTheme.typography.bodyMedium
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -180,10 +185,10 @@ fun ServiceCenterDetailsScreen(
                             Spacer(Modifier.height(24.dp))
 
                             Button(
-                                onClick = { /* TODO: Leave review */ },
+                                onClick = { onShowReviewsClick(branch.id) },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(stringResource(R.string.leave_review))
+                                Text(stringResource(R.string.reviews))
                             }
 
                             Spacer(Modifier.height(32.dp))

@@ -7,6 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.alron.fixall.domain.repository.BranchesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,10 +22,23 @@ class ServiceCenterDetailsViewModel @Inject constructor(
     private val _state = MutableStateFlow(ServiceCenterDetailsState())
     val state = _state.asStateFlow()
 
+    private val branchId: String? = savedStateHandle["id"]
+
     init {
-        savedStateHandle.get<String>("id")?.let { id ->
+        branchId?.let { id ->
             getBranchDetails(id)
+            observeCurrentBranch(id)
         }
+    }
+
+    private fun observeCurrentBranch(id: String) {
+        repository.currentBranch
+            .onEach { updatedBranch ->
+                if (updatedBranch?.id == id) {
+                    _state.update { it.copy(branch = updatedBranch) }
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun getBranchDetails(id: String) {

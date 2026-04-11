@@ -7,5 +7,6 @@ data class Review(
     val rating: Int,
     val comment: String,
     val adminReply: String?,
+    val adminReplyAt: String?,
     val createdAt: String
 )

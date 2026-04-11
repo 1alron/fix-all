@@ -43,5 +43,26 @@ data class ReviewDto(
     val rating: Int,
     val comment: String,
     @SerializedName("admin_reply") val adminReply: String?,
+    @SerializedName("admin_reply_at") val adminReplyAt: String?,
     @SerializedName("created_at") val createdAt: String
+)
+
+data class ReviewListResponseDto(
+    val count: Int,
+    val next: String?,
+    val previous: String?,
+    val results: List<ReviewDto>
+)
+
+data class AddReviewRequestDto(
+    val rating: Int,
+    val comment: String
+)
+
+data class AddReviewResponseDto(
+    val success: Boolean,
+    val message: String?,
+    val data: ReviewDto?,
+    val error: String?,
+    val errors: Map<String, List<String>>?
 )

@@ -40,6 +40,7 @@ import io.alron.fixall.presentation.home.HomeFloatingActionButton
 import io.alron.fixall.presentation.home.HomeScreen
 import io.alron.fixall.presentation.service_centers.ServiceCentersScreen
 import io.alron.fixall.presentation.service_centers.details.ServiceCenterDetailsScreen
+import io.alron.fixall.presentation.service_centers.reviews.ServiceCenterReviewsScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -183,6 +184,18 @@ fun MainNavHost() {
                     arguments = listOf(navArgument("id") { type = NavType.StringType })
                 ) {
                     ServiceCenterDetailsScreen(
+                        onBack = { navController.popBackStack() },
+                        onShowReviewsClick = { id ->
+                            navController.navigate("service_center_reviews/$id")
+                        }
+                    )
+                }
+
+                composable(
+                    route = "service_center_reviews/{id}",
+                    arguments = listOf(navArgument("id") { type = NavType.StringType })
+                ) {
+                    ServiceCenterReviewsScreen(
                         onBack = { navController.popBackStack() }
                     )
                 }

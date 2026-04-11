@@ -64,23 +64,23 @@ fun ModalDrawerContent(
             modifier = Modifier.padding(4.dp)
         )
         NavigationDrawerItem(
+            icon = { Icon(Icons.Default.Place, contentDescription = null) },
+            label = { Text(stringResource(R.string.branches)) },
+            selected = currentRoute == ModalDrawerRoute.ServiceCenters.name,
+            onClick = onServiceCentersClick,
+            modifier = Modifier.padding(4.dp)
+        )
+        NavigationDrawerItem(
             icon = { Icon(painterResource(R.drawable.ic_car), contentDescription = null) },
             label = { Text(stringResource(R.string.my_cars)) },
             selected = currentRoute == ModalDrawerRoute.Cars.name,
             onClick = onCarsClick,
             modifier = Modifier.padding(4.dp)
         )
-        NavigationDrawerItem(
-            icon = { Icon(Icons.Default.Place, contentDescription = null) },
-            label = { Text(stringResource(R.string.our_branches)) },
-            selected = currentRoute == ModalDrawerRoute.ServiceCenters.name,
-            onClick = onServiceCentersClick,
-            modifier = Modifier.padding(4.dp)
-        )
         HorizontalDivider()
         NavigationDrawerItem(
             icon = { Icon(Icons.Default.DateRange, contentDescription = null) },
-            label = { Text(stringResource(R.string.go_to_appointments)) },
+            label = { Text(stringResource(R.string.my_appointments)) },
             selected = currentRoute == ModalDrawerRoute.Appointments.name,
             onClick = onAppointmentsClick,
             modifier = Modifier.padding(4.dp)

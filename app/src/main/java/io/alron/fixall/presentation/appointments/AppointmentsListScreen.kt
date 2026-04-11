@@ -80,7 +80,7 @@ fun AppointmentsListScreen(
     Scaffold(
         topBar = {
             MainToolbar(
-                title = stringResource(R.string.go_to_appointments),
+                title = stringResource(R.string.my_appointments),
                 onNavigationIconClick = onBurgerIconClick,
                 onActionIconClick = onAccountIconClick
             )
