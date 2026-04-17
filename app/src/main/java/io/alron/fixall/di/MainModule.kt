@@ -10,12 +10,15 @@ import dagger.hilt.components.SingletonComponent
 import io.alron.fixall.data.remote.api.AppointmentsApi
 import io.alron.fixall.data.remote.api.BranchesApi
 import io.alron.fixall.data.remote.api.CarsApi
+import io.alron.fixall.data.remote.api.ProfileApi
 import io.alron.fixall.data.repository.AppointmentsRepositoryImpl
 import io.alron.fixall.data.repository.BranchesRepositoryImpl
 import io.alron.fixall.data.repository.CarsRepositoryImpl
+import io.alron.fixall.data.repository.ProfileRepositoryImpl
 import io.alron.fixall.domain.repository.AppointmentsRepository
 import io.alron.fixall.domain.repository.BranchesRepository
 import io.alron.fixall.domain.repository.CarsRepository
+import io.alron.fixall.domain.repository.ProfileRepository
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
@@ -41,7 +44,6 @@ object MainModule {
     ): CarsApi = retrofit.create(CarsApi::class.java)
 
     @Provides
-    @Singleton
     fun providesCarsRepository(
         carsApi: CarsApi,
         @ApplicationContext context: Context,
@@ -59,4 +61,16 @@ object MainModule {
     fun providesAppointmentsRepository(
         appointmentsApi: AppointmentsApi
     ): AppointmentsRepository = AppointmentsRepositoryImpl(appointmentsApi)
+
+    @Provides
+    @Singleton
+    fun providesProfileApi(
+        retrofit: Retrofit
+    ): ProfileApi = retrofit.create(ProfileApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesProfileRepository(
+        profileApi: ProfileApi
+    ): ProfileRepository = ProfileRepositoryImpl(profileApi)
 }

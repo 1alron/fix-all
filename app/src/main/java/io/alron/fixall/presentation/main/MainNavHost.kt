@@ -38,6 +38,8 @@ import io.alron.fixall.presentation.cars.CarsFloatingActionButton
 import io.alron.fixall.presentation.cars.CarsScreen
 import io.alron.fixall.presentation.home.HomeFloatingActionButton
 import io.alron.fixall.presentation.home.HomeScreen
+import io.alron.fixall.presentation.profile.ProfileScreen
+import io.alron.fixall.presentation.profile.stats.StatsScreen
 import io.alron.fixall.presentation.service_centers.ServiceCentersScreen
 import io.alron.fixall.presentation.service_centers.details.ServiceCenterDetailsScreen
 import io.alron.fixall.presentation.service_centers.reviews.ServiceCenterReviewsScreen
@@ -144,7 +146,16 @@ fun MainNavHost() {
                 }
 
                 composable(MainRoute.Profile.name) {
-                    Text("Profile")
+                    ProfileScreen(
+                        onBurgerIconClick = { scope.launch { drawerState.open() } },
+                        onStatsClick = { navController.navigate(MainRoute.Stats.name) }
+                    )
+                }
+
+                composable(MainRoute.Stats.name) {
+                    StatsScreen(
+                        onBack = { navController.popBackStack() }
+                    )
                 }
 
                 composable(ModalDrawerRoute.Cars.name) {

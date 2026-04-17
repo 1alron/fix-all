@@ -109,4 +109,49 @@
     <string name="min_20_chars">Минимум 20 символов</string>
     <string name="send">Отправить</string>
     <string name="admin_response">Ответ администратора</string>
+
+    <!-- Profile & Stats -->
+    <string name="loyalty_program">Программа лояльности</string>
+    <string name="your_status">ВАШ СТАТУС</string>
+    <string name="bonuses">Бонусы</string>
+    <string name="personal_discount">Ваша скидка</string>
+    <string name="next_status_progress">До статуса %1$s: %2$d%%</string>
+    <string name="personal_data">Личные данные</string>
+    <string name="login_label">Логин</string>
+    <string name="name_and_surname">Имя и фамилия</string>
+    <string name="first_name_label">Имя</string>
+    <string name="last_name_label">Фамилия</string>
+    <string name="phone_label">Телефон</string>
+    <string name="address_label">Адрес</string>
+    <string name="not_specified">Не указан</string>
+    <string name="view_statistics">Посмотреть статистику</string>
+    <string name="edit_profile">Редактировать профиль</string>
+    <string name="save">Сохранить</string>
+    <string name="profile_updated">Профиль обновлен</string>
+    <string name="invalid_login_format">Неверный формат логина (только буквы, цифры и @/./+/-/_)</string>
+    <string name="invalid_phone_format">Формат: +79991234567</string>
+
+    <string name="logout_button">Выйти</string>
+    <string name="logout_confirmation_title">Выйти из аккаунта?</string>
+    <string name="logout_confirmation_message">Вы уверены, что хотите выйти? Вам придется войти снова, чтобы пользоваться сервисом.</string>
+
+    <string name="stats_title">Ваша статистика</string>
+    <string name="total_appointments">Всего записей</string>
+    <string name="spent">Траты</string>
+    <string name="visits_by_day">Активность по дням недели</string>
+    <string name="visits_by_hour">Активность по часам (00-23)</string>
+    <string name="top_services">Популярные услуги</string>
+    <string name="stat_completed">Успешно</string>
+    <string name="stat_cancelled">Отменено</string>
+    <string name="times_unit">%1$d раз</string>
+
+    <string name="welcome_back">С возвращением!</string>
+    <string name="upcoming_appointment_title">Предстоящая запись</string>
+    <string name="at_time">в</string>
+    <string name="loading_loyalty">Загрузка данных лояльности...</string>
+
+    <string name="visits">Визитов</string>
+    <string name="spent_r">Потрачено</string>
+    <string name="popular_services">Популярные услуги</string>
+    <string name="finished">Завершено</string>
 </resources>

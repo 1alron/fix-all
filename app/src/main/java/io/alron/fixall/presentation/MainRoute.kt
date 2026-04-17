@@ -8,6 +8,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 enum class MainRoute(val icon: ImageVector? = null) {
     Home(Icons.Default.Home),
     Profile(Icons.Default.AccountBox),
-
+    Stats,
     AddCar
 }
