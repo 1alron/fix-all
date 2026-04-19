@@ -42,10 +42,10 @@ class ProfileViewModel @Inject constructor(
     private fun loadProfileData() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
-            
+
             val userResult = repository.getMe()
             val loyaltyResult = repository.getLoyalty()
-            
+
             if (userResult.isSuccess) {
                 _state.update { it.copy(
                     user = userResult.getOrNull(),

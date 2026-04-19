@@ -1,5 +1,6 @@
 package io.alron.fixall.presentation.profile.stats
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,7 +57,8 @@ fun StatsScreen(
                 onNavigationIconClick = onBack,
                 navigationIcon = Icons.AutoMirrored.Filled.ArrowBack
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -66,7 +67,7 @@ fun StatsScreen(
         ) {
             when {
                 state.isLoading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(modifier = Alignment.Center.let { Modifier.align(it) })
                 }
 
                 state.errorMessage != null -> {
@@ -84,7 +85,7 @@ fun StatsScreen(
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                             .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -96,7 +97,7 @@ fun StatsScreen(
                                 modifier = Modifier.weight(1f)
                             )
                             StatOverviewCard(
-                                label = stringResource(R.string.spent_r),
+                                label = stringResource(R.string.spent_label),
                                 value = "${stats.totalSpent.toInt()} ₽",
                                 modifier = Modifier.weight(1f),
                                 color = MaterialTheme.colorScheme.primary
@@ -105,62 +106,40 @@ fun StatsScreen(
 
                         StatCard(title = stringResource(R.string.visits_by_day)) {
                             val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-                            val max = stats.byWeekday.maxOrNull()?.coerceAtLeast(1) ?: 1
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(140.dp)
-                                    .padding(horizontal = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Bottom
-                            ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 stats.byWeekday.forEachIndexed { index, count ->
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.weight(1f)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Box(
-                                            modifier = Modifier.height(20.dp),
-                                            contentAlignment = Alignment.BottomCenter
-                                        ) {
-                                            if (count > 0) {
-                                                Text(
-                                                    text = count.toString(),
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                            }
-                                        }
+                                        Text(
+                                            text = days[index],
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.width(32.dp),
+                                            fontWeight = FontWeight.Medium
+                                        )
                                         Box(
                                             modifier = Modifier
-                                                .width(24.dp)
-                                                .fillMaxHeight(
-                                                    (count.toFloat() / max).coerceAtLeast(
-                                                        0.05f
-                                                    )
-                                                )
-                                                .clip(
-                                                    RoundedCornerShape(
-                                                        topStart = 4.dp,
-                                                        topEnd = 4.dp
-                                                    )
-                                                )
-                                                .background(
-                                                    brush = Brush.verticalGradient(
-                                                        colors = listOf(
-                                                            MaterialTheme.colorScheme.primary,
-                                                            MaterialTheme.colorScheme.primary.copy(
-                                                                alpha = 0.4f
-                                                            )
-                                                        )
-                                                    )
-                                                )
-                                        )
-                                        Spacer(Modifier.height(4.dp))
+                                                .weight(1f)
+                                                .padding(horizontal = 12.dp)
+                                        ) {
+                                            val max =
+                                                stats.byWeekday.maxOrNull()?.coerceAtLeast(1) ?: 1
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(count.toFloat() / max)
+                                                    .height(10.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.primary)
+                                            )
+                                        }
                                         Text(
-                                            days[index],
-                                            style = MaterialTheme.typography.labelSmall
+                                            text = count.toString(),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.width(24.dp),
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.End
                                         )
                                     }
                                 }
@@ -174,7 +153,7 @@ fun StatsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(100.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(3.dp),
                                     verticalAlignment = Alignment.Bottom
                                 ) {
                                     stats.byHour.forEach { count ->
@@ -186,17 +165,15 @@ fun StatsScreen(
                                                         0.05f
                                                     )
                                                 )
-                                                .clip(RoundedCornerShape(1.dp))
+                                                .clip(RoundedCornerShape(2.dp))
                                                 .background(
-                                                    if (count > 0) MaterialTheme.colorScheme.secondary
-                                                    else MaterialTheme.colorScheme.secondary.copy(
-                                                        alpha = 0.1f
-                                                    )
+                                                    if (count > 0) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.surfaceVariant
                                                 )
                                         )
                                     }
                                 }
-                                Spacer(Modifier.height(4.dp))
+                                Spacer(Modifier.height(8.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
@@ -206,7 +183,7 @@ fun StatsScreen(
                                             it,
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 9.sp
+                                            fontSize = 10.sp
                                         )
                                     }
                                 }
@@ -216,8 +193,8 @@ fun StatsScreen(
                         StatCard(title = stringResource(R.string.popular_services)) {
                             val maxCount =
                                 stats.topServices.firstOrNull()?.count?.coerceAtLeast(1) ?: 1
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                stats.topServices.take(3).forEach { service ->
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                stats.topServices.take(4).forEach { service ->
                                     Column {
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
@@ -225,21 +202,22 @@ fun StatsScreen(
                                         ) {
                                             Text(
                                                 service.name,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = FontWeight.Medium
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                maxLines = 1
                                             )
                                             Text(
                                                 "${service.count}",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = FontWeight.Bold
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
                                             )
                                         }
-                                        Spacer(Modifier.height(4.dp))
+                                        Spacer(Modifier.height(6.dp))
                                         LinearProgressIndicator(
                                             progress = { service.count.toFloat() / maxCount },
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .height(6.dp)
+                                                .height(8.dp)
                                                 .clip(CircleShape),
                                             color = MaterialTheme.colorScheme.primary,
                                             trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -267,7 +245,7 @@ fun StatsScreen(
                             )
                         }
 
-                        Spacer(Modifier.height(24.dp))
+                        Spacer(Modifier.height(32.dp))
                     }
                 }
             }
@@ -285,7 +263,11 @@ fun StatOverviewCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -308,14 +290,18 @@ fun StatCard(title: String, content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                alpha = 0.3f
-            )
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            Text(
+                title,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
+            )
             Spacer(Modifier.height(16.dp))
             content()
         }

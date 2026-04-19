@@ -1,25 +1,27 @@
 package io.alron.fixall.presentation.main
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,6 +29,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.gson.Gson
+import io.alron.fixall.R
 import io.alron.fixall.domain.model.Car
 import io.alron.fixall.presentation.MainRoute
 import io.alron.fixall.presentation.ModalDrawerRoute
@@ -34,159 +37,100 @@ import io.alron.fixall.presentation.appointments.AppointmentsListScreen
 import io.alron.fixall.presentation.appointments.create.CreateAppointmentScreen
 import io.alron.fixall.presentation.appointments.details.AppointmentDetailsScreen
 import io.alron.fixall.presentation.cars.AddCarScreen
-import io.alron.fixall.presentation.cars.CarsFloatingActionButton
 import io.alron.fixall.presentation.cars.CarsScreen
-import io.alron.fixall.presentation.home.HomeFloatingActionButton
 import io.alron.fixall.presentation.home.HomeScreen
 import io.alron.fixall.presentation.profile.ProfileScreen
 import io.alron.fixall.presentation.profile.stats.StatsScreen
 import io.alron.fixall.presentation.service_centers.ServiceCentersScreen
 import io.alron.fixall.presentation.service_centers.details.ServiceCenterDetailsScreen
 import io.alron.fixall.presentation.service_centers.reviews.ServiceCenterReviewsScreen
-import kotlinx.coroutines.launch
 
 @Composable
 fun MainNavHost() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentDestination = navBackStackEntry?.destination
+    val currentRoute = currentDestination?.route
     val startDestination = MainRoute.Home
 
     val scrollState = rememberScrollState()
 
-    var lastScrollValue by remember { mutableIntStateOf(0) }
-    var isScrollingDown by remember { mutableStateOf(false) }
-
-    val fabWidth by animateDpAsState(
-        targetValue = if (isScrollingDown) 56.dp else 180.dp,
-        animationSpec = tween(durationMillis = 300),
-        label = ""
-    )
-    val fabTextAlpha by animateFloatAsState(
-        targetValue = if (isScrollingDown) 0f else 1f,
-        animationSpec = tween(durationMillis = 300),
-        label = ""
+    val bottomNavItems = listOf(
+        BottomNavItem(MainRoute.Home.name, Icons.Default.Home, R.string.general),
+        BottomNavItem(ModalDrawerRoute.Cars.name, Icons.Default.Settings, R.string.my_cars),
+        BottomNavItem(ModalDrawerRoute.ServiceCenters.name, Icons.Default.Place, R.string.branches),
+        BottomNavItem(
+            ModalDrawerRoute.Appointments.name,
+            Icons.Default.DateRange,
+            R.string.my_appointments
+        ),
+        BottomNavItem(MainRoute.Profile.name, Icons.Default.Person, R.string.go_to_profile)
     )
 
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
-    fun navigateWithModalDrawer(
-        route: String
-    ) {
-        scope.launch {
-            drawerState.close()
+    val navigateToTab: (String) -> Unit = { route ->
+        if (currentRoute != route) {
             navController.navigate(route) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
                 launchSingleTop = true
+                restoreState = true
             }
         }
     }
 
-    LaunchedEffect(scrollState.value) {
-        isScrollingDown = scrollState.value > lastScrollValue
-        lastScrollValue = scrollState.value
-    }
+    val bottomScreenWithBarSpacer = WindowInsets.navigationBars
+        .asPaddingValues()
+        .calculateBottomPadding() + 48.dp
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerContent(
-                currentRoute = currentRoute,
-                onHomeClick = {
-                    navigateWithModalDrawer(MainRoute.Home.name)
-                },
-                onCarsClick = {
-                    navigateWithModalDrawer(ModalDrawerRoute.Cars.name)
-                },
-                onServiceCentersClick = {
-                    navigateWithModalDrawer(ModalDrawerRoute.ServiceCenters.name)
-                },
-                onAppointmentsClick = {
-                    navigateWithModalDrawer(ModalDrawerRoute.Appointments.name)
-                }
-            )
-        }
-    ) {
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+    Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            floatingActionButton = {
-                if (currentRoute == MainRoute.Home.name) {
-                    HomeFloatingActionButton(
-                        fabWidth = fabWidth,
-                        fabTextAlpha = fabTextAlpha
-                    )
-                }
-
-                if (currentRoute == ModalDrawerRoute.Cars.name) {
-                    CarsFloatingActionButton(
-                        onClick = {
-                            navController.navigate(MainRoute.AddCar.name)
-                        }
-                    )
-                }
-            }
-        ) { innerPadding ->
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            containerColor = MaterialTheme.colorScheme.background
+        ) { _ ->
             NavHost(
                 navController = navController,
                 startDestination = startDestination.name,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.fillMaxSize()
             ) {
                 composable(MainRoute.Home.name) {
                     HomeScreen(
-                        onAccountIconClick = {
-                            navController.navigate(MainRoute.Profile.name)
-                        },
-                        onBurgerIconClick = {
-                            scope.launch { drawerState.open() }
-                        },
-                        onAddAppointmentClick = {
-                            navController.navigate("create_appointment")
-                        },
-                        scrollState = scrollState
+                        onAccountIconClick = { navigateToTab(MainRoute.Profile.name) },
+                        onAddAppointmentClick = { navController.navigate("create_appointment") },
+                        scrollState = scrollState,
+                        bottomSpacer = bottomScreenWithBarSpacer
                     )
                 }
 
                 composable(MainRoute.Profile.name) {
                     ProfileScreen(
-                        onBurgerIconClick = { scope.launch { drawerState.open() } },
-                        onStatsClick = { navController.navigate(MainRoute.Stats.name) }
+                        onStatsClick = { navController.navigate(MainRoute.Stats.name) },
+                        bottomSpacer = bottomScreenWithBarSpacer
                     )
                 }
 
                 composable(MainRoute.Stats.name) {
-                    StatsScreen(
-                        onBack = { navController.popBackStack() }
-                    )
+                    StatsScreen(onBack = { navController.popBackStack() })
                 }
 
                 composable(ModalDrawerRoute.Cars.name) {
                     CarsScreen(
-                        onAccountIconClick = {
-                            navController.navigate(MainRoute.Profile.name)
-                        },
-                        onBurgerIconClick = {
-                            scope.launch { drawerState.open() }
-                        },
-                        onAddCarClick = {
-                            navController.navigate(MainRoute.AddCar.name)
-                        },
+                        onAccountIconClick = { navigateToTab(MainRoute.Profile.name) },
+                        onAddCarClick = { navController.navigate(MainRoute.AddCar.name) },
                         onEditCarClick = { car ->
                             val carJson = Gson().toJson(car)
                             navController.navigate(MainRoute.AddCar.name + "?car=${carJson}")
-                        }
+                        },
+                        bottomSpacer = bottomScreenWithBarSpacer
                     )
                 }
 
                 composable(ModalDrawerRoute.ServiceCenters.name) {
                     ServiceCentersScreen(
-                        onBurgerIconClick = {
-                            scope.launch { drawerState.open() }
-                        },
-                        onAccountIconClick = {
-                            navController.navigate(MainRoute.Profile.name)
-                        },
-                        onServiceCenterClick = { id ->
-                            navController.navigate("service_center_details/$id")
-                        }
+                        onAccountIconClick = { navigateToTab(MainRoute.Profile.name) },
+                        onServiceCenterClick = { id -> navController.navigate("service_center_details/$id") },
+                        bottomSpacer = bottomScreenWithBarSpacer
                     )
                 }
 
@@ -196,9 +140,7 @@ fun MainNavHost() {
                 ) {
                     ServiceCenterDetailsScreen(
                         onBack = { navController.popBackStack() },
-                        onShowReviewsClick = { id ->
-                            navController.navigate("service_center_reviews/$id")
-                        }
+                        onShowReviewsClick = { id -> navController.navigate("service_center_reviews/$id") }
                     )
                 }
 
@@ -206,17 +148,15 @@ fun MainNavHost() {
                     route = "service_center_reviews/{id}",
                     arguments = listOf(navArgument("id") { type = NavType.StringType })
                 ) {
-                    ServiceCenterReviewsScreen(
-                        onBack = { navController.popBackStack() }
-                    )
+                    ServiceCenterReviewsScreen(onBack = { navController.popBackStack() })
                 }
 
                 composable(ModalDrawerRoute.Appointments.name) {
                     AppointmentsListScreen(
-                        onBurgerIconClick = { scope.launch { drawerState.open() } },
-                        onAccountIconClick = { navController.navigate(MainRoute.Profile.name) },
+                        onAccountIconClick = { navigateToTab(MainRoute.Profile.name) },
                         onAddAppointmentClick = { navController.navigate("create_appointment") },
-                        onAppointmentClick = { id -> navController.navigate("appointment_details/$id") }
+                        onAppointmentClick = { id -> navController.navigate("appointment_details/$id") },
+                        bottomSpacer = bottomScreenWithBarSpacer
                     )
                 }
 
@@ -224,9 +164,7 @@ fun MainNavHost() {
                     route = "appointment_details/{id}",
                     arguments = listOf(navArgument("id") { type = NavType.StringType })
                 ) {
-                    AppointmentDetailsScreen(
-                        onBack = { navController.popBackStack() }
-                    )
+                    AppointmentDetailsScreen(onBack = { navController.popBackStack() })
                 }
 
                 composable("create_appointment") {
@@ -249,16 +187,32 @@ fun MainNavHost() {
                 ) { backStackEntry ->
                     val carJson = backStackEntry.arguments?.getString("car")
                     val car = carJson?.let { Gson().fromJson(it, Car::class.java) }
-
                     AddCarScreen(
                         onBack = { navController.popBackStack() },
-                        onSuccess = {
-                            navController.popBackStack()
-                        },
+                        onSuccess = { navController.popBackStack() },
                         initialCar = car
                     )
                 }
             }
+        }
+
+        val showBottomBar = bottomNavItems.any { it.route == currentRoute }
+
+        if (showBottomBar) {
+            LiquidBottomBar(
+                items = bottomNavItems,
+                currentDestination = currentDestination,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = WindowInsets.navigationBars
+                            .asPaddingValues()
+                            .calculateBottomPadding() + 16.dp
+                    ),
+                onNavigate = { route -> navigateToTab(route) }
+            )
         }
     }
 }

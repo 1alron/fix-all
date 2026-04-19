@@ -7,6 +7,7 @@ import io.alron.fixall.domain.repository.AppointmentsRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -31,37 +32,51 @@ class AppointmentsViewModel @Inject constructor(
 
     init {
         observeAppointments()
+        loadInitialData()
     }
 
     private fun observeAppointments() {
-        _state.update { it.copy(isLoading = true) }
         repository.appointments
             .onEach { appointments ->
                 _state.update { it.copy(appointments = appointments, isLoading = false) }
             }
+            .catch { throwable ->
+                _state.update {
+                    it.copy(
+                        errorMessage = throwable.localizedMessage,
+                        isLoading = false
+                    )
+                }
+            }
             .launchIn(viewModelScope)
+    }
+
+    private fun loadInitialData() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            repository.getAppointments()
+                .onFailure { throwable ->
+                    _state.update { it.copy(errorMessage = throwable.localizedMessage) }
+                }
+            _state.update { it.copy(isLoading = false) }
+        }
     }
 
     fun refresh() {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true, errorMessage = null) }
+
             repository.getAppointments()
                 .onFailure { throwable ->
-                    _state.update { it.copy(errorMessage = throwable.localizedMessage) }
+                    _state.update {
+                        it.copy(
+                            errorMessage = throwable.localizedMessage,
+                            isRefreshing = false
+                        )
+                    }
                 }
-            _state.update { it.copy(isRefreshing = false) }
-        }
-    }
 
-    fun cancelAppointment(id: String) {
-        viewModelScope.launch {
-            repository.cancelAppointment(id)
-                .onSuccess { message ->
-                    _eventChannel.send(AppointmentsEvent.ShowToast(message))
-                }
-                .onFailure { throwable ->
-                    _eventChannel.send(AppointmentsEvent.ShowToast(throwable.localizedMessage ?: "Error"))
-                }
+            _state.update { it.copy(isRefreshing = false) }
         }
     }
 }

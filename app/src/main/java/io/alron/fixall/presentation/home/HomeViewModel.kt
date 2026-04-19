@@ -3,7 +3,6 @@ package io.alron.fixall.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.alron.fixall.domain.AuthManager
 import io.alron.fixall.domain.repository.AppointmentsRepository
 import io.alron.fixall.domain.repository.ProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +15,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val authManager: AuthManager,
     private val appointmentsRepository: AppointmentsRepository,
     private val profileRepository: ProfileRepository
 ) : ViewModel() {
@@ -40,27 +38,34 @@ class HomeViewModel @Inject constructor(
     private fun loadInitialData() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            
+
+            val userJob = launch {
+                profileRepository.getMe().onSuccess { user ->
+                    _state.update { it.copy(user = user) }
+                }
+            }
+
             val loyaltyJob = launch {
                 profileRepository.getLoyalty().onSuccess { loyalty ->
                     _state.update { it.copy(loyaltyInfo = loyalty) }
                 }
             }
-            
+
             val statsJob = launch {
                 profileRepository.getStats().onSuccess { stats ->
                     _state.update { it.copy(userStats = stats) }
                 }
             }
-            
+
             val upcomingJob = launch {
                 appointmentsRepository.getUpcomingAppointment()
             }
-            
+
+            userJob.join()
             loyaltyJob.join()
             statsJob.join()
             upcomingJob.join()
-            
+
             _state.update { it.copy(isLoading = false) }
         }
     }
@@ -68,24 +73,26 @@ class HomeViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true) }
-            
-            profileRepository.getLoyalty().onSuccess { loyalty ->
-                _state.update { it.copy(loyaltyInfo = loyalty) }
+
+            runCatching {
+                profileRepository.getMe().onSuccess { user ->
+                    _state.update { it.copy(user = user) }
+                }
+
+                profileRepository.getLoyalty().onSuccess { loyalty ->
+                    _state.update { it.copy(loyaltyInfo = loyalty) }
+                }
+
+                profileRepository.getStats().onSuccess { stats ->
+                    _state.update { it.copy(userStats = stats) }
+                }
+
+                appointmentsRepository.getUpcomingAppointment()
+            }.onFailure {
+                _state.update { it.copy(isRefreshing = false) }
             }
-            
-            profileRepository.getStats().onSuccess { stats ->
-                _state.update { it.copy(userStats = stats) }
-            }
-            
-            appointmentsRepository.getUpcomingAppointment()
 
             _state.update { it.copy(isRefreshing = false) }
-        }
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            authManager.logout()
         }
     }
 }

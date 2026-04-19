@@ -40,6 +40,7 @@ data class AddCarUiState(
     val modelError: UiText? = null,
     val error: String? = null
 )
+
 sealed class AddCarEvent {
     data class ShowSnackbar(val message: String) : AddCarEvent()
     object CarSaved : AddCarEvent()
@@ -56,8 +57,12 @@ class AddCarViewModel @Inject constructor(
     private val _eventChannel = Channel<AddCarEvent>()
     val events = _eventChannel.receiveAsFlow()
 
-    private val russianPlateRegex =
-        Regex("^[АВЕКМНОРСТУХ]\\d{3}[АВЕКМНОРСТУХ]{2}$", RegexOption.IGNORE_CASE)
+    private val licensePlateRegex =
+        Regex(
+            "^[АВЕКМНОРСТУХABEKMHOPCTYX]\\d{3}[АВЕКМНОРСТУХABEKMHOPCTYX]{2}$",
+            RegexOption.IGNORE_CASE
+        )
+
     private val vinRegex = Regex("^[A-HJ-NPR-Z0-9]{17}$", RegexOption.IGNORE_CASE)
 
     init {
@@ -203,7 +208,7 @@ class AddCarViewModel @Inject constructor(
         if (state.licensePlate.isBlank()) {
             _uiState.update { it.copy(licensePlateError = UiText.StringResource(R.string.field_cant_be_blank)) }
             isValid = false
-        } else if (!russianPlateRegex.matches(state.licensePlate.replace(" ", ""))) {
+        } else if (!licensePlateRegex.matches(state.licensePlate.replace(" ", ""))) {
             _uiState.update { it.copy(licensePlateError = UiText.StringResource(R.string.invalid_license_plate)) }
             isValid = false
         }

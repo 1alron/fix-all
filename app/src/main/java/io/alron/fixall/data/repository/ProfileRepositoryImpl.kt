@@ -6,17 +6,27 @@ import io.alron.fixall.domain.model.LoyaltyInfo
 import io.alron.fixall.domain.model.User
 import io.alron.fixall.domain.model.UserStats
 import io.alron.fixall.domain.repository.ProfileRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import okhttp3.MultipartBody
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ProfileRepositoryImpl @Inject constructor(
     private val api: ProfileApi
 ) : ProfileRepository {
 
+    private val _currentUser = MutableStateFlow<User?>(null)
+    override val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
+
     override suspend fun getMe(): Result<User> {
         return try {
             val userDto = api.getMe()
-            Result.success(userDto.toDomain())
+            val user = userDto.toDomain()
+            _currentUser.value = user
+            Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -41,7 +51,9 @@ class ProfileRepositoryImpl @Inject constructor(
             
             val response = api.updateProfile(updateMap)
             if (response.success && response.data != null) {
-                Result.success(response.data.toDomain())
+                val user = response.data.toDomain()
+                _currentUser.value = user
+                Result.success(user)
             } else {
                 Result.failure(Exception(response.message ?: "Failed to update profile"))
             }
@@ -54,6 +66,8 @@ class ProfileRepositoryImpl @Inject constructor(
         return try {
             val response = api.uploadAvatar(avatar)
             if (response.success && response.avatarUrl != null) {
+                // Обновляем текущего пользователя, чтобы стриггерить UI
+                getMe() 
                 Result.success(response.avatarUrl)
             } else {
                 Result.failure(Exception(response.message ?: "Failed to upload avatar"))
@@ -66,6 +80,8 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun deleteAvatar(): Result<Unit> {
         return try {
             api.deleteAvatar()
+            // Обновляем текущего пользователя
+            getMe()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -88,5 +104,9 @@ class ProfileRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override fun clearCache() {
+        _currentUser.value = null
     }
 }

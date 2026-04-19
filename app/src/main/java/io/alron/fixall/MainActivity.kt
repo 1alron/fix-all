@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import io.alron.fixall.domain.AuthManager
+import io.alron.fixall.domain.repository.ProfileRepository
 import io.alron.fixall.presentation.RootNavHost
 import io.alron.fixall.presentation.theme.FixAllTheme
 import javax.inject.Inject
@@ -16,12 +17,18 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var authManager: AuthManager
 
+    @Inject
+    lateinit var profileRepository: ProfileRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             FixAllTheme {
-                RootNavHost(authManager = authManager)
+                RootNavHost(
+                    authManager = authManager,
+                    profileRepository = profileRepository
+                )
             }
         }
     }

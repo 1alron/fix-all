@@ -44,6 +44,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.alron.fixall.BuildConfig
@@ -56,7 +58,8 @@ fun CarsScreenContent(
     onEditCarClick: (Car) -> Unit,
     onDeleteCar: (String) -> Unit,
     cars: List<Car>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomSpacer: Dp? = null
 ) {
     var carToDelete by remember { mutableStateOf<Car?>(null) }
 
@@ -83,34 +86,54 @@ fun CarsScreenContent(
         )
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Spacer(Modifier.height(16.dp))
-        
-        if (cars.isNotEmpty()) {
+    if (cars.isNotEmpty()) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Spacer(Modifier.height(16.dp))
+
+            Button(
+                onClick = onAddCarClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.add_car))
+            }
+
+            Spacer(Modifier.height(16.dp))
+
             CarsContent(
                 cars = cars,
                 onEditClick = onEditCarClick,
                 onDeleteClick = { carToDelete = it }
             )
-        } else {
-            EmptyCarsContent(onAddCarClick = onAddCarClick)
+            bottomSpacer?.let {
+                Spacer(Modifier.height(it))
+            }
         }
-        
-        Spacer(Modifier.height(32.dp))
+    } else {
+        EmptyCarsContent(
+            onAddCarClick = onAddCarClick,
+            bottomSpacer = bottomSpacer
+        )
     }
 }
 
 @Composable
-fun EmptyCarsContent(onAddCarClick: () -> Unit) {
+fun EmptyCarsContent(
+    onAddCarClick: () -> Unit,
+    bottomSpacer: Dp? = null
+) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 64.dp),
+            .fillMaxSize()
+            .padding(32.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -130,28 +153,29 @@ fun EmptyCarsContent(onAddCarClick: () -> Unit) {
                 tint = MaterialTheme.colorScheme.primary
             )
         }
-        
+
         Spacer(Modifier.height(24.dp))
-        
+
         Text(
             text = stringResource(R.string.you_have_no_cars),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
         )
-        
+
         Spacer(Modifier.height(8.dp))
-        
+
         Text(
             text = stringResource(R.string.add_first_car_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 32.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
-        
+
         Spacer(Modifier.height(32.dp))
-        
+
         Button(
             onClick = onAddCarClick,
             shape = RoundedCornerShape(12.dp)
@@ -159,6 +183,10 @@ fun EmptyCarsContent(onAddCarClick: () -> Unit) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.add_car))
+        }
+
+        bottomSpacer?.let {
+            Spacer(Modifier.height(it))
         }
     }
 }
@@ -225,7 +253,7 @@ fun CarItem(
                         )
                     }
                 }
-                
+
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
@@ -243,7 +271,7 @@ fun CarItem(
                     )
                 }
             }
-            
+
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -263,7 +291,7 @@ fun CarItem(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    
+
                     if (car.vin != null) {
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
@@ -280,9 +308,9 @@ fun CarItem(
                         }
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),

@@ -40,14 +40,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
 import io.alron.fixall.domain.model.Appointment
-import io.alron.fixall.domain.model.LoyaltyInfo
 import io.alron.fixall.presentation.appointments.getStatusColor
 import io.alron.fixall.presentation.components.MainToolbar
 import io.alron.fixall.presentation.profile.getLoyaltyColor
@@ -56,10 +57,10 @@ import io.alron.fixall.presentation.profile.getLoyaltyColor
 @Composable
 fun HomeScreen(
     scrollState: ScrollState,
-    onBurgerIconClick: () -> Unit,
     onAccountIconClick: () -> Unit,
     onAddAppointmentClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomSpacer: Dp? = null,
 ) {
     val viewModel: HomeViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -68,7 +69,6 @@ fun HomeScreen(
         topBar = {
             MainToolbar(
                 title = stringResource(R.string.general),
-                onNavigationIconClick = onBurgerIconClick,
                 onActionIconClick = onAccountIconClick
             )
         }
@@ -83,7 +83,8 @@ fun HomeScreen(
             HomeScreenContent(
                 state = state,
                 scrollState = scrollState,
-                onAddAppointmentClick = onAddAppointmentClick
+                onAddAppointmentClick = onAddAppointmentClick,
+                bottomSpacer = bottomSpacer
             )
         }
     }
@@ -94,7 +95,8 @@ fun HomeScreenContent(
     state: HomeState,
     onAddAppointmentClick: () -> Unit,
     scrollState: ScrollState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomSpacer: Dp? = null,
 ) {
     Column(
         modifier = modifier
@@ -103,7 +105,7 @@ fun HomeScreenContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        WelcomeHeader(loyalty = state.loyaltyInfo)
+        WelcomeHeader(state = state)
 
         state.userStats?.let { stats ->
             QuickStatsRow(
@@ -131,12 +133,20 @@ fun HomeScreenContent(
 
         ServiceInstructionContent(items = StepProvider.provideSteps())
 
-        Spacer(Modifier.height(32.dp))
+        bottomSpacer?.let {
+            Spacer(Modifier.height(it))
+        }
     }
 }
 
 @Composable
-fun WelcomeHeader(loyalty: LoyaltyInfo?) {
+fun WelcomeHeader(state: HomeState) {
+    val displayName = when {
+        !state.user?.firstName.isNullOrBlank() -> state.user.firstName
+        !state.user?.username.isNullOrBlank() -> "@${state.user.username}"
+        else -> ""
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -144,19 +154,21 @@ fun WelcomeHeader(loyalty: LoyaltyInfo?) {
     ) {
         Column {
             Text(
-                text = stringResource(R.string.welcome_back),
+                text = stringResource(R.string.welcome_back) + if (displayName.isNotBlank()) "," else "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Text(
-                text = "Fix All Service",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            if (displayName.isNotBlank()) {
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
-        loyalty?.let {
+        state.loyaltyInfo?.let {
             Surface(
                 color = getLoyaltyColor(it.status).copy(alpha = 0.15f),
                 shape = RoundedCornerShape(12.dp),
@@ -174,7 +186,7 @@ fun WelcomeHeader(loyalty: LoyaltyInfo?) {
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "${it.bonusBalance.toInt()} ₽",
+                        text = stringResource(R.string.currency_rub, it.bonusBalance.toInt()),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = getLoyaltyColor(it.status)
@@ -192,14 +204,14 @@ fun QuickStatsRow(totalAppointments: Int, totalSpent: Double) {
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         StatBox(
-            label = stringResource(R.string.visits),
+            label = stringResource(R.string.visits_label),
             value = totalAppointments.toString(),
             icon = Icons.Default.DateRange,
             modifier = Modifier.weight(1f)
         )
         StatBox(
-            label = stringResource(R.string.spent_r),
-            value = "${totalSpent.toInt()} ₽",
+            label = stringResource(R.string.spent),
+            value = stringResource(R.string.currency_rub, totalSpent.toInt()),
             icon = Icons.Default.Info,
             modifier = Modifier.weight(1f)
         )
@@ -210,7 +222,7 @@ fun QuickStatsRow(totalAppointments: Int, totalSpent: Double) {
 fun StatBox(
     label: String,
     value: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -322,7 +334,7 @@ fun UpcomingAppointmentCard(appointment: Appointment) {
                         )
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            text = "${appointment.scheduledDate} в ${appointment.scheduledTime}",
+                            text = "${appointment.scheduledDate} ${stringResource(R.string.at_time)} ${appointment.scheduledTime}",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -342,7 +354,6 @@ fun ServiceInstructionContent(
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold
     )
-    Spacer(Modifier.height(12.dp))
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(bottom = 8.dp)

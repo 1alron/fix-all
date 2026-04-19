@@ -18,8 +18,8 @@ fun AppointmentDto.toDomain() = Appointment(
         price = "0"
     ),
     serviceCenter = serviceCenter?.toDomain() ?: AppointmentServiceCenter(id = "", address = ""),
-    scheduledDate = scheduledDate ?: "",
-    scheduledTime = scheduledTime ?: "",
+    scheduledDate = formatDate(scheduledDate ?: ""),
+    scheduledTime = formatTime(scheduledTime ?: ""),
     endTime = endTime,
     status = status ?: "",
     statusDisplay = statusDisplay ?: "",
@@ -68,3 +68,31 @@ fun WorkingHoursRangeDto.toDomain() = WorkingHoursRange(
     lunchStart = lunchStart,
     lunchEnd = lunchEnd
 )
+
+private fun formatDate(dateString: String): String {
+    if (dateString.isBlank()) return ""
+    return try {
+        val parts = dateString.split("-")
+        if (parts.size == 3) {
+            "${parts[2]}.${parts[1]}.${parts[0]}"
+        } else {
+            dateString
+        }
+    } catch (e: Exception) {
+        dateString
+    }
+}
+
+private fun formatTime(timeString: String): String {
+    if (timeString.isBlank()) return ""
+    return try {
+        val parts = timeString.split(":")
+        if (parts.size >= 2) {
+            "${parts[0]}:${parts[1]}"
+        } else {
+            timeString
+        }
+    } catch (e: Exception) {
+        timeString
+    }
+}

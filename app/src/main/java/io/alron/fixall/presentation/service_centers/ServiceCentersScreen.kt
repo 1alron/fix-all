@@ -1,6 +1,5 @@
 package io.alron.fixall.presentation.service_centers
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,14 +54,13 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceCentersScreen(
-    onBurgerIconClick: () -> Unit,
     onAccountIconClick: () -> Unit,
     onServiceCenterClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomSpacer: Dp? = null,
 ) {
     val viewModel: ServiceCentersViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     PullToRefreshBox(
         modifier = modifier.fillMaxSize(),
@@ -73,7 +71,6 @@ fun ServiceCentersScreen(
             topBar = {
                 MainToolbar(
                     title = stringResource(R.string.our_branches),
-                    onNavigationIconClick = onBurgerIconClick,
                     onActionIconClick = onAccountIconClick
                 )
             }
@@ -87,7 +84,8 @@ fun ServiceCentersScreen(
                     state.branches.isNotEmpty() -> {
                         ServiceCentersList(
                             branches = state.branches,
-                            onBranchClick = onServiceCenterClick
+                            onBranchClick = onServiceCenterClick,
+                            bottomSpacer = bottomSpacer
                         )
                     }
 
@@ -122,7 +120,8 @@ fun ServiceCentersScreen(
 fun ServiceCentersList(
     branches: List<Branch>,
     onBranchClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomSpacer: Dp? = null
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -134,6 +133,11 @@ fun ServiceCentersList(
                 branch = branch,
                 onClick = { onBranchClick(branch.id) }
             )
+        }
+        bottomSpacer?.let { spacer ->
+            item {
+                Spacer(Modifier.height(spacer))
+            }
         }
     }
 }

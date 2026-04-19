@@ -77,6 +77,10 @@ fun CreateAppointmentScreen(
 
     val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
+    LaunchedEffect(Unit) {
+        viewModel.refreshCars()
+    }
+
     LaunchedEffect(viewModel.events) {
         viewModel.events.collectLatest { event ->
             when (event) {
@@ -352,7 +356,7 @@ fun CreateAppointmentScreen(
                         Spacer(Modifier.height(8.dp))
 
                         val slots = state.availableTimeSlots?.slots ?: emptyList()
-                        if (slots.isEmpty() && !state.isLoading) {
+                        if (slots.isEmpty()) {
                             Text(
                                 text = stringResource(R.string.no_slots_available_for_date),
                                 color = MaterialTheme.colorScheme.error,

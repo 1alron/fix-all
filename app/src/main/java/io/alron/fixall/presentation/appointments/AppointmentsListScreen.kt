@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,13 +25,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,8 +46,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
 import io.alron.fixall.domain.model.Appointment
@@ -57,11 +58,11 @@ import kotlinx.coroutines.flow.collectLatest
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppointmentsListScreen(
-    onBurgerIconClick: () -> Unit,
     onAccountIconClick: () -> Unit,
     onAddAppointmentClick: () -> Unit,
     onAppointmentClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomSpacer: Dp? = null,
 ) {
     val viewModel: AppointmentsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -78,28 +79,18 @@ fun AppointmentsListScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             MainToolbar(
                 title = stringResource(R.string.my_appointments),
-                onNavigationIconClick = onBurgerIconClick,
-                onActionIconClick = onAccountIconClick
+                onActionIconClick = onAccountIconClick,
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddAppointmentClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-            }
         }
     ) { innerPadding ->
         PullToRefreshBox(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.refresh() },
         ) {
@@ -109,6 +100,7 @@ fun AppointmentsListScreen(
                         CircularProgressIndicator()
                     }
                 }
+
                 state.errorMessage != null -> {
                     Column(
                         modifier = Modifier
@@ -121,13 +113,20 @@ fun AppointmentsListScreen(
                         Text(state.errorMessage!!)
                     }
                 }
+
                 state.appointments.isEmpty() -> {
-                    EmptyAppointmentsContent(onAddAppointmentClick = onAddAppointmentClick)
+                    EmptyAppointmentsContent(
+                        onAddAppointmentClick = onAddAppointmentClick,
+                        bottomSpacer = bottomSpacer
+                    )
                 }
+
                 else -> {
                     AppointmentsList(
                         appointments = state.appointments,
-                        onAppointmentClick = onAppointmentClick
+                        onAddAppointmentClick = onAddAppointmentClick,
+                        onAppointmentClick = onAppointmentClick,
+                        bottomSpacer = bottomSpacer
                     )
                 }
             }
@@ -138,18 +137,36 @@ fun AppointmentsListScreen(
 @Composable
 fun AppointmentsList(
     appointments: List<Appointment>,
-    onAppointmentClick: (String) -> Unit
+    onAddAppointmentClick: () -> Unit,
+    onAppointmentClick: (String) -> Unit,
+    bottomSpacer: Dp? = null
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+        contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item {
+            Button(
+                onClick = onAddAppointmentClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.create_appointment))
+            }
+        }
         items(appointments) { appointment ->
             AppointmentItem(
                 appointment = appointment,
                 onClick = { onAppointmentClick(appointment.id) }
             )
+        }
+        bottomSpacer?.let {
+            item {
+                Spacer(Modifier.height(it))
+            }
         }
     }
 }
@@ -181,9 +198,9 @@ fun AppointmentItem(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
-                
+
                 Spacer(Modifier.width(8.dp))
-                
+
                 Box(
                     modifier = Modifier
                         .background(
@@ -201,32 +218,32 @@ fun AppointmentItem(
                     )
                 }
             }
-            
+
             Spacer(Modifier.height(12.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
             Spacer(Modifier.height(12.dp))
-            
+
             AppointmentInfoRow(
                 icon = Icons.Default.DateRange,
                 text = "${appointment.scheduledDate} в ${appointment.scheduledTime}"
             )
-            
+
             Spacer(Modifier.height(8.dp))
-            
+
             AppointmentInfoRow(
                 icon = Icons.Default.Place,
                 text = appointment.serviceCenter.address
             )
-            
+
             Spacer(Modifier.height(8.dp))
-            
+
             AppointmentInfoRow(
                 icon = Icons.Default.Build,
                 text = "${appointment.car.brandName} ${appointment.car.modelName} (${appointment.car.licensePlate})"
             )
-            
+
             Spacer(Modifier.height(12.dp))
-            
+
             Text(
                 text = "${appointment.totalPrice} ₽",
                 style = MaterialTheme.typography.titleMedium,
@@ -260,34 +277,69 @@ fun AppointmentInfoRow(
 }
 
 @Composable
-fun EmptyAppointmentsContent(onAddAppointmentClick: () -> Unit) {
+fun EmptyAppointmentsContent(
+    onAddAppointmentClick: () -> Unit,
+    bottomSpacer: Dp? = null
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(32.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.DateRange,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-        )
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.DateRange,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
         Spacer(Modifier.height(24.dp))
+
         Text(
             text = stringResource(R.string.you_have_no_appointments),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
+
         Spacer(Modifier.height(8.dp))
+
         Text(
             text = stringResource(R.string.appoint_to_service_centers),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 32.dp),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
+
+        Spacer(Modifier.height(32.dp))
+
+        Button(
+            onClick = onAddAppointmentClick,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.create_appointment))
+        }
+
+        bottomSpacer?.let {
+            Spacer(Modifier.height(it))
+        }
     }
 }
 

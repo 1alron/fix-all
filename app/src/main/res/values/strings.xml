@@ -39,6 +39,7 @@
     <string name="go_to_general">Перейти на главную</string>
     <string name="my_appointments">Мои заказы</string>
     <string name="go_to_profile">Перейти в профиль</string>
+    <string name="profile">Профиль</string>
 
     <string name="general">Главная</string>
     <string name="profile_icon">Иконка профиля</string>
@@ -128,7 +129,7 @@
     <string name="edit_profile">Редактировать профиль</string>
     <string name="save">Сохранить</string>
     <string name="profile_updated">Профиль обновлен</string>
-    <string name="invalid_login_format">Неверный формат логина (только буквы, цифры и @/./+/-/_)</string>
+    <string name="invalid_login_format">Только буквы, цифры и @/./+/-/_</string>
     <string name="invalid_phone_format">Формат: +79991234567</string>
 
     <string name="logout_button">Выйти</string>
@@ -145,13 +146,15 @@
     <string name="stat_cancelled">Отменено</string>
     <string name="times_unit">%1$d раз</string>
 
-    <string name="welcome_back">С возвращением!</string>
+    <string name="welcome_back">С возвращением</string>
+    <string name="welcome_back_personal">С возвращением, %1$s!</string>
     <string name="upcoming_appointment_title">Предстоящая запись</string>
     <string name="at_time">в</string>
     <string name="loading_loyalty">Загрузка данных лояльности...</string>
 
-    <string name="visits">Визитов</string>
-    <string name="spent_r">Потрачено</string>
-    <string name="popular_services">Популярные услуги</string>
+    <string name="visits_label">Визитов</string>
+    <string name="spent_label">Потрачено</string>
+    <string name="currency_rub">%1$d ₽</string>
     <string name="finished">Завершено</string>
+    <string name="popular_services">Популярные услуги</string>
 </resources>

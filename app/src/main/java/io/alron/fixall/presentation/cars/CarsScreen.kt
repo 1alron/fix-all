@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,11 +32,11 @@ import kotlinx.coroutines.flow.collectLatest
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarsScreen(
-    onBurgerIconClick: () -> Unit,
     onAccountIconClick: () -> Unit,
     onAddCarClick: () -> Unit,
     onEditCarClick: (Car) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomSpacer: Dp? = null,
 ) {
     val viewModel = hiltViewModel<CarsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -59,7 +60,6 @@ fun CarsScreen(
         topBar = {
             MainToolbar(
                 title = stringResource(R.string.my_cars),
-                onNavigationIconClick = onBurgerIconClick,
                 onActionIconClick = onAccountIconClick
             )
         }
@@ -100,7 +100,8 @@ fun CarsScreen(
                         onEditCarClick = onEditCarClick,
                         onDeleteCar = { id -> viewModel.deleteCar(id) },
                         cars = state.cars,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        bottomSpacer = bottomSpacer
                     )
                 }
             }
