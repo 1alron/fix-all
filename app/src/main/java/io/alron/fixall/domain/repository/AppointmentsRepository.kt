@@ -28,4 +28,5 @@ interface AppointmentsRepository {
         serviceTypeId: String,
         date: String
     ): Result<TimeSlots>
+    suspend fun initiatePayment(appointmentId: String, bonusAmount: Double): Result<String>
 }

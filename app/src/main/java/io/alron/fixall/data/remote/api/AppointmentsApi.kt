@@ -31,4 +31,10 @@ interface AppointmentsApi {
         @Query("service_type_id") serviceTypeId: String,
         @Query("date") date: String
     ): AvailableTimeSlotsDto
+
+    @POST("/api/appointments/{id}/create_payment/")
+    suspend fun initiatePayment(
+        @Path("id") id: String,
+        @Body request: PaymentRequestDto
+    ): PaymentResponseDto
 }

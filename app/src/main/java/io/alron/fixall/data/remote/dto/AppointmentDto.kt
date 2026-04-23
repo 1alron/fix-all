@@ -16,7 +16,11 @@ data class AppointmentDto(
     @SerializedName("created_at") val createdAt: String? = null,
     @SerializedName("updated_at") val updatedAt: String? = null,
     @SerializedName("can_cancel") val canCancel: Boolean? = null,
-    @SerializedName("total_price") val totalPrice: Any? = null // Can be String or Double from backend
+    @SerializedName("total_price") val totalPrice: Any? = null,
+    @SerializedName("payment_url") val paymentUrl: String? = null,
+    @SerializedName("is_paid") val isPaid: Boolean? = null,
+    @SerializedName("paid_at") val paidAt: String? = null,
+    @SerializedName("payment_status") val paymentStatus: String? = null
 )
 
 data class AppointmentCarDto(
@@ -71,4 +75,15 @@ data class CancelAppointmentResponseDto(
     val success: Boolean? = null,
     val message: String? = null,
     val error: String? = null
+)
+
+data class PaymentRequestDto(
+    @SerializedName("bonus_amount") val bonusAmount: Double
+)
+
+data class PaymentResponseDto(
+    @SerializedName("payment_id") val paymentId: String? = null,
+    @SerializedName("payment_url") val paymentUrl: String? = null,
+    val amount: Double? = null,
+    val status: String? = null
 )

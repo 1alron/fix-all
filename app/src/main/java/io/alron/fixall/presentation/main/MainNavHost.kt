@@ -98,6 +98,7 @@ fun MainNavHost() {
                     HomeScreen(
                         onAccountIconClick = { navigateToTab(MainRoute.Profile.name) },
                         onAddAppointmentClick = { navController.navigate("create_appointment") },
+                        onFindBranchClick = { navigateToTab(ModalDrawerRoute.ServiceCenters.name) },
                         scrollState = scrollState,
                         bottomSpacer = bottomScreenWithBarSpacer
                     )

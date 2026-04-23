@@ -2,28 +2,15 @@ package io.alron.fixall.presentation.service_centers.reviews
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -34,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,8 +32,11 @@ import io.alron.fixall.R
 import io.alron.fixall.domain.model.Review
 import io.alron.fixall.presentation.components.MainToolbar
 import kotlinx.coroutines.flow.collectLatest
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceCenterReviewsScreen(
     onBack: () -> Unit,
@@ -55,7 +44,6 @@ fun ServiceCenterReviewsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var showAddReviewDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel.events) {
         viewModel.events.collectLatest { event ->
@@ -63,21 +51,10 @@ fun ServiceCenterReviewsScreen(
                 is ServiceCenterReviewsEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
-
                 ServiceCenterReviewsEvent.ReviewAdded -> {
-                    showAddReviewDialog = false
                 }
             }
         }
-    }
-
-    if (showAddReviewDialog) {
-        AddReviewDialog(
-            onDismiss = { showAddReviewDialog = false },
-            onSubmit = { rating, comment ->
-                viewModel.addReview(rating, comment)
-            }
-        )
     }
 
     Scaffold(
@@ -87,94 +64,133 @@ fun ServiceCenterReviewsScreen(
                 onNavigationIconClick = onBack,
                 navigationIcon = Icons.AutoMirrored.Filled.ArrowBack
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddReviewDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Default.Star, contentDescription = null)
-            }
         }
     ) { innerPadding ->
         PullToRefreshBox(
-            modifier = Modifier
-                .padding(top = innerPadding.calculateTopPadding())
-                .fillMaxSize(),
+            modifier = Modifier.padding(innerPadding).fillMaxSize(),
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.loadReviews(refresh = true) }
         ) {
-            val listState = rememberLazyListState()
-
-            LaunchedEffect(listState) {
-                snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
-                    .collectLatest { lastIndex ->
-                        if (lastIndex != null && lastIndex >= state.reviews.size - 1) {
-                            viewModel.loadNextPage()
-                        }
-                    }
-            }
-
             LazyColumn(
-                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                if (state.isEligibilityChecked) {
+                    item {
+                        ReviewEligibilitySection(state = state, onAddReview = viewModel::addReview)
+                    }
+                }
+
                 if (state.isLoading && state.reviews.isEmpty()) {
                     item {
-                        Box(
-                            modifier = Modifier.fillParentMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Box(Modifier.fillParentMaxHeight(0.5f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator()
                         }
                     }
-                } else {
-                    val error = state.errorMessage
-                    if (error != null && state.reviews.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier.fillParentMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = error,
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.padding(32.dp)
-                                )
-                            }
-                        }
-                    } else if (state.reviews.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier.fillParentMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(stringResource(R.string.no_reviews_yet))
-                            }
-                        }
-                    } else {
-                        items(state.reviews) { review ->
-                            ReviewItem(review = review)
-                        }
-
-                        if (state.isLoading && state.reviews.isNotEmpty()) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                                }
-                            }
+                } else if (state.reviews.isEmpty()) {
+                    item {
+                        Box(Modifier.fillParentMaxHeight(0.5f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Text(stringResource(R.string.no_reviews_yet), style = MaterialTheme.typography.bodyLarge)
                         }
                     }
+                } else {
+                    items(state.reviews) { review ->
+                        ReviewItem(review = review)
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ReviewEligibilitySection(
+    state: ServiceCenterReviewsState,
+    onAddReview: (Int, String) -> Unit
+) {
+    when {
+        state.alreadyReviewed -> {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
+            ) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Вы уже поделились своим мнением об этом филиале", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
+        !state.hasCompletedAppointment -> {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text("Отзывы доступны только клиентам", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text("Необходимо иметь завершенную запись в этом филиале.", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+        else -> {
+            AddReviewSection(onAddReview = onAddReview, isSubmitting = state.isSubmitting)
+        }
+    }
+}
+
+@Composable
+fun AddReviewSection(onAddReview: (Int, String) -> Unit, isSubmitting: Boolean) {
+    var rating by remember { mutableStateOf(5) }
+    var comment by remember { mutableStateOf("") }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(stringResource(R.string.leave_review), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(12.dp))
+            
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                repeat(5) { index ->
+                    val starIndex = index + 1
+                    IconButton(onClick = { rating = starIndex }, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = if (starIndex <= rating) Color(0xFFFFB300) else Color.Gray.copy(alpha = 0.3f)
+                        )
+                    }
+                }
+            }
+            
+            Spacer(Modifier.height(12.dp))
+            
+            OutlinedTextField(
+                value = comment,
+                onValueChange = { comment = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(stringResource(R.string.min_20_chars)) },
+                minLines = 3,
+                shape = RoundedCornerShape(12.dp)
+            )
+            
+            Spacer(Modifier.height(16.dp))
+            
+            Button(
+                onClick = { onAddReview(rating, comment) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = comment.length >= 20 && !isSubmitting,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (isSubmitting) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                else Text(stringResource(R.string.send))
             }
         }
     }
@@ -185,106 +201,44 @@ fun ReviewItem(review: Review) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                alpha = 0.3f
-            )
-        )
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(
-                    model = review.userAvatar?.let {
-                        if (it.startsWith("http")) it
-                        else "${BuildConfig.BASE_URL}$it"
-                    },
+                    model = review.userAvatar?.let { if (it.startsWith("http")) it else "${BuildConfig.BASE_URL}$it" } ?: R.drawable.ic_visibility,
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                    modifier = Modifier.size(40.dp).clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
                 Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = review.userName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Row {
-                        repeat(5) { index ->
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint =
-                                    if (index < review.rating) Color(0xFFFFB300)
-                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                        alpha = 0.2f
-                                    )
-                            )
-                        }
+                Column(modifier = Modifier.weight(1f)) {
+                    val displayName = if (review.userName.isNullOrBlank()) "Пользователь" else review.userName
+                    Text(text = displayName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    Text(text = formatReviewDate(review.createdAt), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Row {
+                    repeat(review.rating) {
+                        Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFFFFB300))
                     }
                 }
-                Spacer(Modifier.weight(1f))
-                Column(horizontalAlignment = Alignment.End) {
-                    val formattedDate = formatIsoDate(review.createdAt)
-                    val time = review.createdAt.split("T").getOrNull(1)
-                        ?.take(5) ?: ""
-
-                    Text(
-                        text = formattedDate,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = time,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                }
             }
-
+            
             Spacer(Modifier.height(12.dp))
             Text(text = review.comment, style = MaterialTheme.typography.bodyMedium)
-
-            if (review.adminReply != null) {
+            
+            review.adminReply?.let { reply ->
                 Spacer(Modifier.height(12.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(8.dp)
-                        )
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                         .padding(12.dp)
                 ) {
                     Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.admin_response),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                            )
-                            review.adminReplyAt?.let { replyTime ->
-                                val formattedDate = formatIsoDate(replyTime)
-                                val time = replyTime.split("T").getOrNull(1)
-                                    ?.take(5) ?: ""
-                                Text(
-                                    text = "$formattedDate $time",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                )
-                            }
-                        }
+                        Text(text = stringResource(R.string.admin_response), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(4.dp))
-                        Text(text = review.adminReply, style = MaterialTheme.typography.bodySmall)
+                        Text(text = reply, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -292,94 +246,15 @@ fun ReviewItem(review: Review) {
     }
 }
 
-private fun formatIsoDate(isoString: String): String {
-    val datePart = isoString.split("T").firstOrNull() ?: return isoString
-    val parts = datePart.split("-")
-    return if (parts.size == 3) {
-        "${parts[2]}.${parts[1]}.${parts[0]}"
-    } else {
-        datePart
+private fun formatReviewDate(dateString: String): String {
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+        val outputFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+        
+        val date = inputFormat.parse(dateString)
+        date?.let { outputFormat.format(it) } ?: dateString
+    } catch (e: Exception) {
+        dateString
     }
-}
-
-@Composable
-fun AddReviewDialog(
-    onDismiss: () -> Unit,
-    onSubmit: (Int, String) -> Unit
-) {
-    var rating by remember { mutableIntStateOf(5) }
-    var comment by remember { mutableStateOf("") }
-    val isLengthValid = comment.length >= 20
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.leave_review)) },
-        text = {
-            Column {
-                Text(stringResource(R.string.your_rating))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    repeat(5) { index ->
-                        IconButton(onClick = { rating = index + 1 }) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                tint =
-                                    if (index < rating) Color(0xFFFFB300)
-                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                        alpha = 0.2f
-                                    ),
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = comment,
-                    onValueChange = { comment = it },
-                    label = { Text(stringResource(R.string.comment)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    isError = comment.isNotEmpty() && !isLengthValid,
-                    supportingText = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            if (comment.isNotEmpty() && !isLengthValid) {
-                                Text(
-                                    stringResource(R.string.min_20_chars),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            } else {
-                                Spacer(Modifier.width(1.dp))
-                            }
-                            Text(
-                                "${comment.length}/20",
-                                color =
-                                    if (isLengthValid) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onSubmit(rating, comment) },
-                enabled = isLengthValid
-            ) {
-                Text(stringResource(R.string.send))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
 }

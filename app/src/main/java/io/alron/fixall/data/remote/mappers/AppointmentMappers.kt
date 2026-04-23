@@ -27,7 +27,10 @@ fun AppointmentDto.toDomain() = Appointment(
     createdAt = createdAt,
     updatedAt = updatedAt,
     canCancel = canCancel ?: false,
-    totalPrice = totalPrice?.toString() ?: "0"
+    totalPrice = totalPrice?.toString() ?: "0",
+    paymentUrl = paymentUrl,
+    isPaid = isPaid ?: (paymentStatus == "succeeded"),
+    paymentDate = paidAt
 )
 
 fun AppointmentCarDto.toDomain() = AppointmentCar(

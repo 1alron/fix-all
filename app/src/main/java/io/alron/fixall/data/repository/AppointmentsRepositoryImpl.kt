@@ -2,6 +2,7 @@ package io.alron.fixall.data.repository
 
 import io.alron.fixall.data.remote.api.AppointmentsApi
 import io.alron.fixall.data.remote.dto.CreateAppointmentRequestDto
+import io.alron.fixall.data.remote.dto.PaymentRequestDto
 import io.alron.fixall.data.remote.mappers.toDomain
 import io.alron.fixall.domain.model.Appointment
 import io.alron.fixall.domain.model.Service
@@ -88,7 +89,6 @@ class AppointmentsRepositoryImpl @Inject constructor(
     override suspend fun getUpcomingAppointment(): Result<Appointment?> {
         return try {
             val response = api.getUpcomingAppointment()
-            // Check if response has actual data or is just a message
             val domain = if (response.id != null) response.toDomain() else null
             _upcomingAppointment.emit(domain)
             Result.success(domain)
@@ -124,6 +124,19 @@ class AppointmentsRepositoryImpl @Inject constructor(
         return try {
             val response = api.getAvailableTimeSlots(serviceCenterId, serviceTypeId, date)
             Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun initiatePayment(appointmentId: String, bonusAmount: Double): Result<String> {
+        return try {
+            val response = api.initiatePayment(appointmentId, PaymentRequestDto(bonusAmount))
+            if (response.paymentUrl != null) {
+                Result.success(response.paymentUrl)
+            } else {
+                Result.failure(Exception("Payment URL not found"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

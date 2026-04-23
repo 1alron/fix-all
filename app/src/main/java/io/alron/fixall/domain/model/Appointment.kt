@@ -14,7 +14,12 @@ data class Appointment(
     val createdAt: String? = null,
     val updatedAt: String? = null,
     val canCancel: Boolean = false,
-    val totalPrice: String
+    val totalPrice: String,
+    val paymentUrl: String? = null,
+    val isPaid: Boolean = false,
+    val paymentDate: String? = null,
+    val bonusesUsed: Double = 0.0,
+    val amountPaid: Double = 0.0
 )
 
 data class AppointmentCar(
