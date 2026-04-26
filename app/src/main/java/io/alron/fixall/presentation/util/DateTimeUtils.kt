@@ -9,7 +9,12 @@ object DateTimeUtils {
     private val apiDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
-    private val uiDateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.US)
+    
+    private val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply {
+        timeZone = TimeZone.getTimeZone("UTC")
+    }
+    
+    private val fullDateTimeFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
 
     fun formatDate(dateString: String?): String {
         if (dateString.isNullOrBlank()) return ""
@@ -40,6 +45,16 @@ object DateTimeUtils {
             }
         } catch (e: Exception) {
             timeString
+        }
+    }
+
+    fun formatFullDateTime(dateTimeString: String?): String {
+        if (dateTimeString.isNullOrBlank()) return ""
+        return try {
+            val date = isoFormat.parse(dateTimeString.substring(0, 19))
+            date?.let { fullDateTimeFormat.format(it) } ?: dateTimeString
+        } catch (e: Exception) {
+            dateTimeString
         }
     }
 

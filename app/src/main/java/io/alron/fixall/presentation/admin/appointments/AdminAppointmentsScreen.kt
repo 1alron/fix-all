@@ -31,6 +31,7 @@ import io.alron.fixall.presentation.util.DateTimeUtils
 @Composable
 fun AdminAppointmentsScreen(
     onBack: () -> Unit,
+    onAppointmentClick: (String) -> Unit,
     viewModel: AdminAppointmentsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -109,7 +110,7 @@ fun AdminAppointmentsScreen(
                                 items(state.appointments) { appointment ->
                                     AdminAppointmentCard(
                                         appointment = appointment,
-                                        onClick = { /* TODO: Open details */ }
+                                        onClick = { onAppointmentClick(appointment.id) }
                                     )
                                 }
                             }

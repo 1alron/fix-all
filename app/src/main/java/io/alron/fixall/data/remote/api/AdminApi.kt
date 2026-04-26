@@ -1,13 +1,7 @@
 package io.alron.fixall.data.remote.api
 
-import io.alron.fixall.data.remote.dto.AdminAppointmentListItemDto
-import io.alron.fixall.data.remote.dto.AdminAttendanceStatsDto
-import io.alron.fixall.data.remote.dto.AdminDashboardDto
-import io.alron.fixall.data.remote.dto.AdminServicePopularityDto
-import io.alron.fixall.data.remote.dto.AdminStatusStatsDto
-import retrofit2.http.GET
-import retrofit2.http.Query
-import retrofit2.http.QueryMap
+import io.alron.fixall.data.remote.dto.*
+import retrofit2.http.*
 
 interface AdminApi {
     @GET("/api/admin-panel/dashboard/full/")
@@ -26,4 +20,19 @@ interface AdminApi {
     suspend fun getAppointments(
         @QueryMap filters: Map<String, String>
     ): List<AdminAppointmentListItemDto>
+
+    @GET("/api/admin-panel/appointments/{id}/")
+    suspend fun getAppointmentDetail(@Path("id") id: String): AdminAppointmentDetailDto
+
+    @POST("/api/admin-panel/appointments/{id}/change_status/")
+    suspend fun changeStatus(
+        @Path("id") id: String,
+        @Body request: ChangeStatusRequestDto
+    ): Unit
+
+    @POST("/api/admin-panel/appointments/{id}/add_note/")
+    suspend fun addNote(
+        @Path("id") id: String,
+        @Body request: AddNoteRequestDto
+    ): AddNoteResponseDto
 }

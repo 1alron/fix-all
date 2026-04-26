@@ -1,6 +1,8 @@
 package io.alron.fixall.data.repository
 
 import io.alron.fixall.data.remote.api.AdminApi
+import io.alron.fixall.data.remote.dto.AddNoteRequestDto
+import io.alron.fixall.data.remote.dto.ChangeStatusRequestDto
 import io.alron.fixall.domain.model.*
 import io.alron.fixall.domain.repository.AdminRepository
 import io.alron.fixall.presentation.util.DateTimeUtils
@@ -107,6 +109,58 @@ class AdminRepositoryImpl @Inject constructor(
                     )
                 }
             )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getAppointmentDetail(id: String): Result<AdminAppointmentDetail> {
+        return try {
+            val dto = api.getAppointmentDetail(id)
+            Result.success(
+                AdminAppointmentDetail(
+                    id = dto.id,
+                    scheduledDate = DateTimeUtils.formatDate(dto.scheduledDate),
+                    scheduledTime = DateTimeUtils.formatTime(dto.scheduledTime),
+                    endTime = dto.endTime,
+                    carInfo = dto.carInfo,
+                    clientName = dto.clientName,
+                    clientEmail = dto.clientEmail,
+                    clientPhone = dto.clientPhone,
+                    serviceName = dto.serviceName,
+                    serviceDuration = dto.serviceDuration,
+                    centerAddress = dto.centerAddress,
+                    status = dto.status,
+                    statusDisplay = dto.statusDisplay,
+                    notes = dto.notes,
+                    vin = dto.vin,
+                    totalPrice = dto.totalPrice,
+                    isPaid = dto.isPaid,
+                    paymentInfo = dto.paymentInfo?.let { 
+                        AdminPaymentInfo(it.status, it.paidAt, it.amount)
+                    },
+                    createdAt = dto.createdAt,
+                    updatedAt = dto.updatedAt
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun changeStatus(id: String, status: String): Result<Unit> {
+        return try {
+            api.changeStatus(id, ChangeStatusRequestDto(status))
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addNote(id: String, note: String): Result<AddNoteResponse> {
+        return try {
+            val response = api.addNote(id, AddNoteRequestDto(note))
+            Result.success(AddNoteResponse(response.success, response.notes))
         } catch (e: Exception) {
             Result.failure(e)
         }
