@@ -9,6 +9,7 @@ data class UserDto(
     @SerializedName("first_name") val firstName: String,
     @SerializedName("last_name") val lastName: String,
     @SerializedName("full_name") val fullName: String,
+    @SerializedName("is_staff") val isStaff: Boolean = false,
     val profile: UserProfileDto
 )
 

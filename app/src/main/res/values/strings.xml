@@ -131,6 +131,7 @@
     <string name="profile_updated">Профиль обновлен</string>
     <string name="invalid_login_format">Только буквы, цифры и @/./+/-/_</string>
     <string name="invalid_phone_format">Формат: +79991234567</string>
+    <string name="admin_panel">Панель администратора</string>
 
     <string name="logout_button">Выйти</string>
     <string name="logout_confirmation_title">Выйти из аккаунта?</string>
