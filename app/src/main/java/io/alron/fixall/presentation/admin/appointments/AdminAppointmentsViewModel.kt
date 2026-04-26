@@ -37,24 +37,34 @@ class AdminAppointmentsViewModel @Inject constructor(
     fun loadAppointments() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            
-            val filters = mutableMapOf<String, String>()
-            _state.value.centerId?.let { filters["center_id"] = it }
-            _state.value.dateFrom?.let { filters["date_from"] = it }
-            _state.value.dateTo?.let { filters["date_to"] = it }
-            _state.value.status?.let { filters["status"] = it }
-            if (_state.value.search.isNotBlank()) {
-                filters["search"] = _state.value.search.trim()
-            }
-
-            repository.getAppointments(filters)
-                .onSuccess { appointments ->
-                    _state.update { it.copy(isLoading = false, appointments = appointments) }
-                }
-                .onFailure { error ->
-                    _state.update { it.copy(isLoading = false, error = error.message) }
-                }
+            fetchAppointments()
         }
+    }
+
+    fun refreshAppointments() {
+        viewModelScope.launch {
+            _state.update { it.copy(isRefreshing = true, error = null) }
+            fetchAppointments()
+        }
+    }
+
+    private suspend fun fetchAppointments() {
+        val filters = mutableMapOf<String, String>()
+        _state.value.centerId?.let { filters["center_id"] = it }
+        _state.value.dateFrom?.let { filters["date_from"] = it }
+        _state.value.dateTo?.let { filters["date_to"] = it }
+        _state.value.status?.let { filters["status"] = it }
+        if (_state.value.search.isNotBlank()) {
+            filters["search"] = _state.value.search.trim()
+        }
+
+        repository.getAppointments(filters)
+            .onSuccess { appointments ->
+                _state.update { it.copy(isLoading = false, isRefreshing = false, appointments = appointments) }
+            }
+            .onFailure { error ->
+                _state.update { it.copy(isLoading = false, isRefreshing = false, error = error.message) }
+            }
     }
 
     fun onSearchChange(query: String) {

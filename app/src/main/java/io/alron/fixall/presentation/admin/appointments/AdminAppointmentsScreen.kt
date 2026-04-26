@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,56 +56,62 @@ fun AdminAppointmentsScreen(
             )
         }
     ) { padding ->
-        Column(
+        PullToRefreshBox(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            isRefreshing = state.isRefreshing,
+            onRefresh = { viewModel.refreshAppointments() }
         ) {
-            if (showFilters) {
-                FiltersBlock(
-                    state = state,
-                    onSearchChange = viewModel::onSearchChange,
-                    onStatusChange = viewModel::onStatusChange,
-                    onCenterChange = viewModel::onCenterChange,
-                    onDateFromChange = viewModel::onDateFromChange,
-                    onDateToChange = viewModel::onDateToChange,
-                    onClearFilters = viewModel::clearFilters,
-                    onApplySearch = viewModel::loadAppointments
-                )
-            }
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (showFilters) {
+                    FiltersBlock(
+                        state = state,
+                        onSearchChange = viewModel::onSearchChange,
+                        onStatusChange = viewModel::onStatusChange,
+                        onCenterChange = viewModel::onCenterChange,
+                        onDateFromChange = viewModel::onDateFromChange,
+                        onDateToChange = viewModel::onDateToChange,
+                        onClearFilters = viewModel::clearFilters,
+                        onApplySearch = viewModel::loadAppointments
+                    )
+                }
 
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                } else if (state.error != null) {
-                    Text(
-                        text = state.error!!,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                } else if (state.appointments.isEmpty()) {
-                    Text(
-                        text = "Записей не найдено",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                } else {
-                    Column(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (state.isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    } else if (state.error != null && state.appointments.isEmpty()) {
                         Text(
-                            text = "Найдено записей: ${state.appointments.size}",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            text = state.error!!,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.align(Alignment.Center)
                         )
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(state.appointments) { appointment ->
-                                AdminAppointmentCard(
-                                    appointment = appointment,
-                                    onClick = { /* TODO: Open details */ }
-                                )
+                    } else if (state.appointments.isEmpty()) {
+                        Text(
+                            text = "Записей не найдено",
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    } else {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = "Найдено записей: ${state.appointments.size}",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(state.appointments) { appointment ->
+                                    AdminAppointmentCard(
+                                        appointment = appointment,
+                                        onClick = { /* TODO: Open details */ }
+                                    )
+                                }
                             }
                         }
                     }
