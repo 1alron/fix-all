@@ -75,6 +75,7 @@ import io.alron.fixall.domain.model.AdminStatusStats
 @Composable
 fun AdminDashboardScreen(
     onBack: () -> Unit,
+    onNewAppointmentClick: () -> Unit,
     viewModel: AdminDashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -157,7 +158,9 @@ fun AdminDashboardScreen(
                             }
 
                             item {
-                                AdminActionsBlock()
+                                AdminActionsBlock(
+                                    onNewAppointmentClick = onNewAppointmentClick
+                                )
                             }
 
                             item {
@@ -237,7 +240,9 @@ fun AdminDashboardScreen(
 }
 
 @Composable
-fun AdminActionsBlock() {
+fun AdminActionsBlock(
+    onNewAppointmentClick: () -> Unit
+) {
     Column {
         Text(
             text = "Управление",
@@ -255,7 +260,7 @@ fun AdminActionsBlock() {
                 ActionItem(
                     label = "Новая запись",
                     icon = Icons.Default.Add,
-                    onClick = { /* TODO */ }
+                    onClick = onNewAppointmentClick
                 )
             }
             item {

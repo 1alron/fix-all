@@ -118,7 +118,10 @@ fun MainNavHost() {
                 }
 
                 composable(MainRoute.AdminDashboard.name) {
-                    AdminDashboardScreen(onBack = { navController.popBackStack() })
+                    AdminDashboardScreen(
+                        onBack = { navController.popBackStack() },
+                        onNewAppointmentClick = { navController.navigate("create_appointment") }
+                    )
                 }
 
                 composable(ModalDrawerRoute.Cars.name) {
