@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -195,11 +196,29 @@ fun AdminDashboardScreen(
                                 }
                             }
 
-                            items(stats.upcoming) { appointment ->
-                                UpcomingAppointmentItem(
-                                    appointment = appointment,
-                                    onClick = { /* TODO: Open appointment details */ }
-                                )
+                            if (stats.upcoming.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Нет ближайших записей",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(stats.upcoming) { appointment ->
+                                    UpcomingAppointmentItem(
+                                        appointment = appointment,
+                                        onClick = { /* TODO: Open appointment details */ }
+                                    )
+                                }
                             }
                         }
                     }
