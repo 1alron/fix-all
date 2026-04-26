@@ -28,11 +28,25 @@ interface AdminApi {
     suspend fun changeStatus(
         @Path("id") id: String,
         @Body request: ChangeStatusRequestDto
-    ): Unit
+    )
 
     @POST("/api/admin-panel/appointments/{id}/add_note/")
     suspend fun addNote(
         @Path("id") id: String,
         @Body request: AddNoteRequestDto
     ): AddNoteResponseDto
+
+    @GET("/api/admin-panel/reviews/")
+    suspend fun getReviews(
+        @QueryMap filters: Map<String, String>
+    ): List<AdminReviewListItemDto>
+
+    @POST("/api/admin-panel/reviews/{id}/reply/")
+    suspend fun replyToReview(
+        @Path("id") id: String,
+        @Body request: AdminReplyRequestDto
+    ): AdminReplyResponseDto
+
+    @DELETE("/api/admin-panel/reviews/{id}/")
+    suspend fun deleteReview(@Path("id") id: String): DeleteReviewResponseDto
 }

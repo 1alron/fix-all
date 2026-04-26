@@ -36,6 +36,7 @@ import io.alron.fixall.presentation.ModalDrawerRoute
 import io.alron.fixall.presentation.admin.AdminDashboardScreen
 import io.alron.fixall.presentation.admin.appointments.AdminAppointmentsScreen
 import io.alron.fixall.presentation.admin.appointments.details.AdminAppointmentDetailScreen
+import io.alron.fixall.presentation.admin.reviews.AdminReviewsScreen
 import io.alron.fixall.presentation.appointments.AppointmentsListScreen
 import io.alron.fixall.presentation.appointments.create.CreateAppointmentScreen
 import io.alron.fixall.presentation.appointments.details.AppointmentDetailsScreen
@@ -126,7 +127,8 @@ fun MainNavHost() {
                         onAllAppointmentsClick = { navController.navigate(MainRoute.AdminAppointments.name) },
                         onAppointmentClick = { id ->
                             navController.navigate("${MainRoute.AdminAppointmentDetail.name}/$id")
-                        }
+                        },
+                        onReviewsClick = { navController.navigate(MainRoute.AdminReviews.name) }
                     )
                 }
 
@@ -144,6 +146,12 @@ fun MainNavHost() {
                     arguments = listOf(navArgument("id") { type = NavType.StringType })
                 ) {
                     AdminAppointmentDetailScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable(MainRoute.AdminReviews.name) {
+                    AdminReviewsScreen(
                         onBack = { navController.popBackStack() }
                     )
                 }

@@ -1,5 +1,6 @@
 package io.alron.fixall.domain.repository
 
+import io.alron.fixall.data.remote.dto.*
 import io.alron.fixall.domain.model.*
 
 interface AdminRepository {
@@ -11,4 +12,7 @@ interface AdminRepository {
     suspend fun getAppointmentDetail(id: String): Result<AdminAppointmentDetail>
     suspend fun changeStatus(id: String, status: String): Result<Unit>
     suspend fun addNote(id: String, note: String): Result<AddNoteResponse>
+    suspend fun getReviews(filters: Map<String, String>): Result<List<AdminReviewListItemDto>>
+    suspend fun replyToReview(id: String, reply: String): Result<AdminReplyResponseDto>
+    suspend fun deleteReview(id: String): Result<DeleteReviewResponseDto>
 }

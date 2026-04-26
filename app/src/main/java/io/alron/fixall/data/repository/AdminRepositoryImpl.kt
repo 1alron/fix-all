@@ -1,8 +1,7 @@
 package io.alron.fixall.data.repository
 
 import io.alron.fixall.data.remote.api.AdminApi
-import io.alron.fixall.data.remote.dto.AddNoteRequestDto
-import io.alron.fixall.data.remote.dto.ChangeStatusRequestDto
+import io.alron.fixall.data.remote.dto.*
 import io.alron.fixall.domain.model.*
 import io.alron.fixall.domain.repository.AdminRepository
 import io.alron.fixall.presentation.util.DateTimeUtils
@@ -161,6 +160,33 @@ class AdminRepositoryImpl @Inject constructor(
         return try {
             val response = api.addNote(id, AddNoteRequestDto(note))
             Result.success(AddNoteResponse(response.success, response.notes))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getReviews(filters: Map<String, String>): Result<List<AdminReviewListItemDto>> {
+        return try {
+            val response = api.getReviews(filters)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun replyToReview(id: String, reply: String): Result<AdminReplyResponseDto> {
+        return try {
+            val response = api.replyToReview(id, AdminReplyRequestDto(reply))
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteReview(id: String): Result<DeleteReviewResponseDto> {
+        return try {
+            val response = api.deleteReview(id)
+            Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
         }
