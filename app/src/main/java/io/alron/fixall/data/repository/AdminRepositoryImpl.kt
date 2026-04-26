@@ -3,6 +3,7 @@ package io.alron.fixall.data.repository
 import io.alron.fixall.data.remote.api.AdminApi
 import io.alron.fixall.domain.model.*
 import io.alron.fixall.domain.repository.AdminRepository
+import io.alron.fixall.presentation.util.DateTimeUtils
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,8 +23,8 @@ class AdminRepositoryImpl @Inject constructor(
                     upcoming = dto.upcoming.map { appointmentDto ->
                         AdminAppointment(
                             id = appointmentDto.id,
-                            date = appointmentDto.date,
-                            time = appointmentDto.time,
+                            date = DateTimeUtils.formatDate(appointmentDto.date),
+                            time = DateTimeUtils.formatTime(appointmentDto.time),
                             client = appointmentDto.client,
                             service = appointmentDto.service,
                             car = appointmentDto.car,
@@ -80,6 +81,31 @@ class AdminRepositoryImpl @Inject constructor(
                         ServicePopularityItem(it.name, it.count, it.percentage)
                     }
                 )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getAppointments(filters: Map<String, String>): Result<List<AdminAppointmentListItem>> {
+        return try {
+            val results = api.getAppointments(filters)
+            Result.success(
+                results.map {
+                    AdminAppointmentListItem(
+                        id = it.id,
+                        scheduledDate = DateTimeUtils.formatDate(it.scheduledDate),
+                        scheduledTime = DateTimeUtils.formatTime(it.scheduledTime),
+                        carInfo = it.carInfo,
+                        clientName = it.clientName,
+                        clientEmail = it.clientEmail,
+                        serviceName = it.serviceName,
+                        centerAddress = it.centerAddress,
+                        status = it.status,
+                        statusDisplay = it.statusDisplay,
+                        notes = it.notes
+                    )
+                }
             )
         } catch (e: Exception) {
             Result.failure(e)

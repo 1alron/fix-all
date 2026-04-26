@@ -5,5 +5,6 @@ enum class MainRoute {
     Profile,
     Stats,
     AddCar,
-    AdminDashboard
+    AdminDashboard,
+    AdminAppointments
 }
