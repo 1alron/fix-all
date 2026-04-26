@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,11 +54,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
 import io.alron.fixall.presentation.components.MainToolbar
+import io.alron.fixall.presentation.util.DateTimeUtils
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -74,8 +77,6 @@ fun CreateAppointmentScreen(
     var serviceExpanded by remember { mutableStateOf(false) }
     var carExpanded by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
-
-    val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
     LaunchedEffect(Unit) {
         viewModel.refreshCars()
@@ -120,8 +121,7 @@ fun CreateAppointmentScreen(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val date = Date(millis)
-                        val dateString = dateFormatter.format(date)
+                        val dateString = DateTimeUtils.millisToApiDate(millis)
                         viewModel.onDateStringSelected(dateString)
                     }
                     showDatePicker = false
@@ -323,7 +323,7 @@ fun CreateAppointmentScreen(
                     Spacer(Modifier.height(8.dp))
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
-                            value = state.selectedDate,
+                            value = DateTimeUtils.formatDate(state.selectedDate),
                             onValueChange = {},
                             readOnly = true,
                             placeholder = { Text(stringResource(R.string.select_date)) },

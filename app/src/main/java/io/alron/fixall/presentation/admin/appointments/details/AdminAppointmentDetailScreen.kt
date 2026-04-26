@@ -101,18 +101,32 @@ fun AdminAppointmentDetailScreen(
                                 DetailItem(Icons.Default.Info, "Стоимость: ${String.format(Locale.getDefault(), "%.2f", appointment.totalPrice)} руб.")
                             }
 
-                            // Payment Block
+
+                            val (paymentLabel, paymentColor) = when (appointment.paymentStatus) {
+                                "succeeded" -> "Оплачено" to MaterialTheme.colorScheme.primaryContainer
+                                "pending" -> "Ожидает оплаты" to MaterialTheme.colorScheme.tertiaryContainer
+                                "canceled" -> "Отменен" to MaterialTheme.colorScheme.errorContainer
+                                else -> "Не оплачено" to MaterialTheme.colorScheme.surfaceVariant
+                            }
+                            
+                            val onPaymentTextColor = when (appointment.paymentStatus) {
+                                "succeeded" -> MaterialTheme.colorScheme.onPrimaryContainer
+                                "pending" -> MaterialTheme.colorScheme.onTertiaryContainer
+                                "canceled" -> MaterialTheme.colorScheme.onErrorContainer
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+
                             InfoBlock(title = "Оплата") {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Surface(
-                                        color = if (appointment.isPaid) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer,
+                                        color = paymentColor,
                                         shape = RoundedCornerShape(4.dp)
                                     ) {
                                         Text(
-                                            text = if (appointment.isPaid) "Оплачено" else "Ожидает оплаты",
+                                            text = paymentLabel,
                                             style = MaterialTheme.typography.labelSmall,
                                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                            color = if (appointment.isPaid) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
+                                            color = onPaymentTextColor
                                         )
                                     }
                                     if (appointment.isPaid && appointment.paymentInfo != null) {

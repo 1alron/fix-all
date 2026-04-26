@@ -18,6 +18,7 @@ data class AdminAppointmentDetail(
     val vin: String?,
     val totalPrice: Double,
     val isPaid: Boolean,
+    val paymentStatus: String? = null,
     val paymentInfo: AdminPaymentInfo?,
     val createdAt: String,
     val updatedAt: String

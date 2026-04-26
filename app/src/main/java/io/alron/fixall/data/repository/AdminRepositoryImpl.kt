@@ -135,6 +135,7 @@ class AdminRepositoryImpl @Inject constructor(
                     vin = dto.vin,
                     totalPrice = dto.totalPrice,
                     isPaid = dto.isPaid,
+                    paymentStatus = dto.paymentStatus,
                     paymentInfo = dto.paymentInfo?.let { 
                         AdminPaymentInfo(it.status, it.paidAt, it.amount)
                     },

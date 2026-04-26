@@ -20,6 +20,7 @@ data class AdminAppointmentDetailDto(
     val vin: String?,
     @SerializedName("total_price") val totalPrice: Double,
     @SerializedName("is_paid") val isPaid: Boolean,
+    @SerializedName("payment_status") val paymentStatus: String?,
     @SerializedName("payment_info") val paymentInfo: AdminPaymentInfoDto?,
     @SerializedName("created_at") val createdAt: String,
     @SerializedName("updated_at") val updatedAt: String
