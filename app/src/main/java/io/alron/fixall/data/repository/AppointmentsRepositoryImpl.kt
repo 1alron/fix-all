@@ -1,8 +1,7 @@
 package io.alron.fixall.data.repository
 
 import io.alron.fixall.data.remote.api.AppointmentsApi
-import io.alron.fixall.data.remote.dto.CreateAppointmentRequestDto
-import io.alron.fixall.data.remote.dto.PaymentRequestDto
+import io.alron.fixall.data.remote.dto.*
 import io.alron.fixall.data.remote.mappers.toDomain
 import io.alron.fixall.domain.model.Appointment
 import io.alron.fixall.domain.model.Service
@@ -137,6 +136,24 @@ class AppointmentsRepositoryImpl @Inject constructor(
             } else {
                 Result.failure(Exception("Payment URL not found"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getPaymentStatus(id: String): Result<PaymentStatusDto> {
+        return try {
+            val response = api.getPaymentStatus(id)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun syncPaymentStatus(id: String): Result<SyncPaymentStatusResponseDto> {
+        return try {
+            val response = api.syncPaymentStatus(id)
+            Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
         }
