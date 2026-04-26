@@ -3,6 +3,7 @@ package io.alron.fixall.presentation.admin
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,12 +24,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -153,6 +157,10 @@ fun AdminDashboardScreen(
                             }
 
                             item {
+                                AdminActionsBlock()
+                            }
+
+                            item {
                                 StatusStatsBlock(
                                     stats = state.statusStats,
                                     isLoading = state.isLoadingStatuses,
@@ -224,6 +232,106 @@ fun AdminDashboardScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun AdminActionsBlock() {
+    Column {
+        Text(
+            text = "Управление",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.height(220.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                ActionItem(
+                    label = "Новая запись",
+                    icon = Icons.Default.Add,
+                    onClick = { /* TODO */ }
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Все записи",
+                    icon = Icons.AutoMirrored.Filled.List,
+                    onClick = { /* TODO */ }
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Филиалы",
+                    icon = Icons.Default.Place,
+                    onClick = { /* TODO */ }
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Отзывы",
+                    icon = Icons.Default.Star,
+                    onClick = { /* TODO */ }
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Пользователи",
+                    icon = Icons.Default.Person,
+                    onClick = { /* TODO */ }
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Услуги",
+                    icon = Icons.Default.Build,
+                    onClick = { /* TODO */ }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ActionItem(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(28.dp)
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
