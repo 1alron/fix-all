@@ -58,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
 import io.alron.fixall.domain.model.AdminAppointment
 import io.alron.fixall.domain.model.AdminAttendanceStats
+import io.alron.fixall.domain.model.AdminServicePopularity
 import io.alron.fixall.domain.model.AdminStatusStats
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -152,6 +153,15 @@ fun AdminDashboardScreen(
                         }
 
                         item {
+                            ServicePopularityBlock(
+                                stats = state.servicePopularity,
+                                isLoading = state.isLoadingPopularity,
+                                selectedPeriod = state.selectedPopularityPeriod,
+                                onPeriodChange = { viewModel.loadServicePopularity(it) }
+                            )
+                        }
+
+                        item {
                             AttendanceStatsBlock(
                                 stats = state.attendanceStats,
                                 isLoading = state.isLoadingAttendance,
@@ -181,6 +191,95 @@ fun AdminDashboardScreen(
                             UpcomingAppointmentItem(
                                 appointment = appointment,
                                 onClick = { /* TODO: Open appointment details */ }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ServicePopularityBlock(
+    stats: AdminServicePopularity?,
+    isLoading: Boolean,
+    selectedPeriod: String,
+    onPeriodChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Популярность услуг",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PeriodButton("Неделя", "week", selectedPeriod == "week") { onPeriodChange("week") }
+                PeriodButton("Месяц", "month", selectedPeriod == "month") { onPeriodChange("month") }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            stats?.let { s ->
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    s.services.forEach { service ->
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = service.name,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.weight(1f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = "${String.format("%.1f", service.percentage)}%",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            
+                            val animatedProgress by animateFloatAsState(
+                                targetValue = (service.percentage / 100f).toFloat(),
+                                label = "progress"
+                            )
+                            
+                            LinearProgressIndicator(
+                                progress = { animatedProgress },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp)
+                                    .clip(CircleShape),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
                             )
                         }
                     }

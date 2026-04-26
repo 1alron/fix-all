@@ -69,4 +69,20 @@ class AdminRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun getServicePopularity(period: String): Result<AdminServicePopularity> {
+        return try {
+            val dto = api.getServicePopularity(period)
+            Result.success(
+                AdminServicePopularity(
+                    period = dto.period,
+                    services = dto.services.map { 
+                        ServicePopularityItem(it.name, it.count, it.percentage)
+                    }
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

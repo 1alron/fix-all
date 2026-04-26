@@ -22,6 +22,7 @@ class AdminDashboardViewModel @Inject constructor(
         loadDashboard()
         loadStatusStats(_state.value.selectedPeriod)
         loadAttendanceStats(_state.value.selectedAttendancePeriod)
+        loadServicePopularity(_state.value.selectedPopularityPeriod)
     }
 
     fun loadDashboard() {
@@ -59,6 +60,19 @@ class AdminDashboardViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoadingAttendance = false) }
+                }
+        }
+    }
+
+    fun loadServicePopularity(period: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingPopularity = true, selectedPopularityPeriod = period) }
+            repository.getServicePopularity(period)
+                .onSuccess { stats ->
+                    _state.update { it.copy(isLoadingPopularity = false, servicePopularity = stats) }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(isLoadingPopularity = false) }
                 }
         }
     }
