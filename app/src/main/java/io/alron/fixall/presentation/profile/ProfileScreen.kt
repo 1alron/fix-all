@@ -93,6 +93,7 @@ import java.util.Locale
 @Composable
 fun ProfileScreen(
     onStatsClick: () -> Unit,
+    onAdminClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel(),
     bottomSpacer: Dp? = null,
@@ -339,7 +340,7 @@ fun ProfileScreen(
 
                         if (state.user?.isAdmin == true) {
                             Button(
-                                onClick = { /* TODO: Open Admin Panel */ },
+                                onClick = onAdminClick,
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(

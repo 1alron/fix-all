@@ -33,6 +33,7 @@ import io.alron.fixall.R
 import io.alron.fixall.domain.model.Car
 import io.alron.fixall.presentation.MainRoute
 import io.alron.fixall.presentation.ModalDrawerRoute
+import io.alron.fixall.presentation.admin.AdminDashboardScreen
 import io.alron.fixall.presentation.appointments.AppointmentsListScreen
 import io.alron.fixall.presentation.appointments.create.CreateAppointmentScreen
 import io.alron.fixall.presentation.appointments.details.AppointmentDetailsScreen
@@ -107,12 +108,17 @@ fun MainNavHost() {
                 composable(MainRoute.Profile.name) {
                     ProfileScreen(
                         onStatsClick = { navController.navigate(MainRoute.Stats.name) },
+                        onAdminClick = { navController.navigate(MainRoute.AdminDashboard.name) },
                         bottomSpacer = bottomScreenWithBarSpacer
                     )
                 }
 
                 composable(MainRoute.Stats.name) {
                     StatsScreen(onBack = { navController.popBackStack() })
+                }
+
+                composable(MainRoute.AdminDashboard.name) {
+                    AdminDashboardScreen(onBack = { navController.popBackStack() })
                 }
 
                 composable(ModalDrawerRoute.Cars.name) {

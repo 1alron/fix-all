@@ -7,14 +7,17 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.alron.fixall.data.remote.api.AdminApi
 import io.alron.fixall.data.remote.api.AppointmentsApi
 import io.alron.fixall.data.remote.api.BranchesApi
 import io.alron.fixall.data.remote.api.CarsApi
 import io.alron.fixall.data.remote.api.ProfileApi
+import io.alron.fixall.data.repository.AdminRepositoryImpl
 import io.alron.fixall.data.repository.AppointmentsRepositoryImpl
 import io.alron.fixall.data.repository.BranchesRepositoryImpl
 import io.alron.fixall.data.repository.CarsRepositoryImpl
 import io.alron.fixall.data.repository.ProfileRepositoryImpl
+import io.alron.fixall.domain.repository.AdminRepository
 import io.alron.fixall.domain.repository.AppointmentsRepository
 import io.alron.fixall.domain.repository.BranchesRepository
 import io.alron.fixall.domain.repository.CarsRepository
@@ -73,4 +76,16 @@ object MainModule {
     fun providesProfileRepository(
         profileApi: ProfileApi
     ): ProfileRepository = ProfileRepositoryImpl(profileApi)
+
+    @Provides
+    @Singleton
+    fun providesAdminApi(
+        retrofit: Retrofit
+    ): AdminApi = retrofit.create(AdminApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesAdminRepository(
+        adminApi: AdminApi
+    ): AdminRepository = AdminRepositoryImpl(adminApi)
 }
