@@ -19,6 +19,10 @@ class AdminDashboardViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
+        refresh()
+    }
+
+    fun refresh() {
         loadDashboard()
         loadStatusStats(_state.value.selectedPeriod)
         loadAttendanceStats(_state.value.selectedAttendancePeriod)

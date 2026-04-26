@@ -44,6 +44,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -85,117 +86,121 @@ fun AdminDashboardScreen(
             )
         }
     ) { padding ->
-        Box(
+        PullToRefreshBox(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            isRefreshing = state.isLoading && state.stats != null,
+            onRefresh = { viewModel.refresh() }
         ) {
-            if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.error != null) {
-                Text(
-                    text = state.error!!,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                state.stats?.let { stats ->
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp)
-                    ) {
-                        item {
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(2),
-                                modifier = Modifier.height(300.dp),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                item {
-                                    StatCard(
-                                        title = "Всего записей",
-                                        value = stats.totalAppointments.toString(),
-                                        icon = Icons.Default.DateRange,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                                item {
-                                    StatCard(
-                                        title = "Активные услуги",
-                                        value = stats.activeServices.toString(),
-                                        icon = Icons.Default.Build,
-                                        color = MaterialTheme.colorScheme.secondary
-                                    )
-                                }
-                                item {
-                                    StatCard(
-                                        title = "Клиенты",
-                                        value = stats.totalClients.toString(),
-                                        icon = Icons.Default.Person,
-                                        color = MaterialTheme.colorScheme.tertiary
-                                    )
-                                }
-                                item {
-                                    StatCard(
-                                        title = "Филиалы",
-                                        value = stats.totalCenters.toString(),
-                                        icon = Icons.Default.Place,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (state.isLoading && state.stats == null) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (state.error != null && state.stats == null) {
+                    Text(
+                        text = state.error!!,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else {
+                    state.stats?.let { stats ->
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp)
+                        ) {
+                            item {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(2),
+                                    modifier = Modifier.height(300.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    item {
+                                        StatCard(
+                                            title = "Всего записей",
+                                            value = stats.totalAppointments.toString(),
+                                            icon = Icons.Default.DateRange,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    item {
+                                        StatCard(
+                                            title = "Активные услуги",
+                                            value = stats.activeServices.toString(),
+                                            icon = Icons.Default.Build,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                    item {
+                                        StatCard(
+                                            title = "Клиенты",
+                                            value = stats.totalClients.toString(),
+                                            icon = Icons.Default.Person,
+                                            color = MaterialTheme.colorScheme.tertiary
+                                        )
+                                    }
+                                    item {
+                                        StatCard(
+                                            title = "Филиалы",
+                                            value = stats.totalCenters.toString(),
+                                            icon = Icons.Default.Place,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        item {
-                            StatusStatsBlock(
-                                stats = state.statusStats,
-                                isLoading = state.isLoadingStatuses,
-                                selectedPeriod = state.selectedPeriod,
-                                onPeriodChange = { viewModel.loadStatusStats(it) }
-                            )
-                        }
-
-                        item {
-                            ServicePopularityBlock(
-                                stats = state.servicePopularity,
-                                isLoading = state.isLoadingPopularity,
-                                selectedPeriod = state.selectedPopularityPeriod,
-                                onPeriodChange = { viewModel.loadServicePopularity(it) }
-                            )
-                        }
-
-                        item {
-                            AttendanceStatsBlock(
-                                stats = state.attendanceStats,
-                                isLoading = state.isLoadingAttendance,
-                                selectedPeriod = state.selectedAttendancePeriod,
-                                onPeriodChange = { viewModel.loadAttendanceStats(it) }
-                            )
-                        }
-
-                        item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Ближайшие записи",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold
+                            item {
+                                StatusStatsBlock(
+                                    stats = state.statusStats,
+                                    isLoading = state.isLoadingStatuses,
+                                    selectedPeriod = state.selectedPeriod,
+                                    onPeriodChange = { viewModel.loadStatusStats(it) }
                                 )
-                                TextButton(onClick = { /* TODO: Navigate to all appointments */ }) {
-                                    Text("Все записи")
+                            }
+
+                            item {
+                                ServicePopularityBlock(
+                                    stats = state.servicePopularity,
+                                    isLoading = state.isLoadingPopularity,
+                                    selectedPeriod = state.selectedPopularityPeriod,
+                                    onPeriodChange = { viewModel.loadServicePopularity(it) }
+                                )
+                            }
+
+                            item {
+                                AttendanceStatsBlock(
+                                    stats = state.attendanceStats,
+                                    isLoading = state.isLoadingAttendance,
+                                    selectedPeriod = state.selectedAttendancePeriod,
+                                    onPeriodChange = { viewModel.loadAttendanceStats(it) }
+                                )
+                            }
+
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Ближайшие записи",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    TextButton(onClick = { /* TODO: Navigate to all appointments */ }) {
+                                        Text("Все записи")
+                                    }
                                 }
                             }
-                        }
 
-                        items(stats.upcoming) { appointment ->
-                            UpcomingAppointmentItem(
-                                appointment = appointment,
-                                onClick = { /* TODO: Open appointment details */ }
-                            )
+                            items(stats.upcoming) { appointment ->
+                                UpcomingAppointmentItem(
+                                    appointment = appointment,
+                                    onClick = { /* TODO: Open appointment details */ }
+                                )
+                            }
                         }
                     }
                 }
