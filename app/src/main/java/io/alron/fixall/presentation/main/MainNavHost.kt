@@ -123,7 +123,10 @@ fun MainNavHost() {
                     AdminDashboardScreen(
                         onBack = { navController.popBackStack() },
                         onNewAppointmentClick = { navController.navigate("create_appointment") },
-                        onAllAppointmentsClick = { navController.navigate(MainRoute.AdminAppointments.name) }
+                        onAllAppointmentsClick = { navController.navigate(MainRoute.AdminAppointments.name) },
+                        onAppointmentClick = { id ->
+                            navController.navigate("${MainRoute.AdminAppointmentDetail.name}/$id")
+                        }
                     )
                 }
 

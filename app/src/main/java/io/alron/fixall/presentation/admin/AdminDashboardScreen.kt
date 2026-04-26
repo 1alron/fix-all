@@ -77,6 +77,7 @@ fun AdminDashboardScreen(
     onBack: () -> Unit,
     onNewAppointmentClick: () -> Unit,
     onAllAppointmentsClick: () -> Unit,
+    onAppointmentClick: (String) -> Unit,
     viewModel: AdminDashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -229,7 +230,7 @@ fun AdminDashboardScreen(
                                 items(stats.upcoming) { appointment ->
                                     UpcomingAppointmentItem(
                                         appointment = appointment,
-                                        onClick = { /* TODO: Open appointment details */ }
+                                        onClick = { onAppointmentClick(appointment.id) }
                                     )
                                 }
                             }
