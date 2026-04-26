@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.domain.model.AdminAppointmentListItem
+import io.alron.fixall.presentation.util.DateTimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +65,11 @@ fun AdminAppointmentsScreen(
                     state = state,
                     onSearchChange = viewModel::onSearchChange,
                     onStatusChange = viewModel::onStatusChange,
-                    onClearFilters = viewModel::clearFilters
+                    onCenterChange = viewModel::onCenterChange,
+                    onDateFromChange = viewModel::onDateFromChange,
+                    onDateToChange = viewModel::onDateToChange,
+                    onClearFilters = viewModel::clearFilters,
+                    onApplySearch = viewModel::loadAppointments
                 )
             }
 
@@ -83,16 +88,24 @@ fun AdminAppointmentsScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(state.appointments) { appointment ->
-                            AdminAppointmentCard(
-                                appointment = appointment,
-                                onClick = { /* TODO: Open details */ }
-                            )
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = "Найдено записей: ${state.appointments.size}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(state.appointments) { appointment ->
+                                AdminAppointmentCard(
+                                    appointment = appointment,
+                                    onClick = { /* TODO: Open details */ }
+                                )
+                            }
                         }
                     }
                 }
@@ -101,39 +114,187 @@ fun AdminAppointmentsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FiltersBlock(
     state: AdminAppointmentsState,
     onSearchChange: (String) -> Unit,
     onStatusChange: (String?) -> Unit,
-    onClearFilters: () -> Unit
+    onCenterChange: (String?) -> Unit,
+    onDateFromChange: (String?) -> Unit,
+    onDateToChange: (String?) -> Unit,
+    onClearFilters: () -> Unit,
+    onApplySearch: () -> Unit
 ) {
+    var showDatePickerFrom by remember { mutableStateOf(false) }
+    var showDatePickerTo by remember { mutableStateOf(false) }
+
+    val datePickerStateFrom = rememberDatePickerState()
+    val datePickerStateTo = rememberDatePickerState()
+
+    if (showDatePickerFrom) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerFrom = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerStateFrom.selectedDateMillis?.let {
+                        onDateFromChange(DateTimeUtils.millisToApiDate(it))
+                    }
+                    showDatePickerFrom = false
+                }) { Text("ОК") }
+            }
+        ) { DatePicker(state = datePickerStateFrom) }
+    }
+
+    if (showDatePickerTo) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerTo = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerStateTo.selectedDateMillis?.let {
+                        onDateToChange(DateTimeUtils.millisToApiDate(it))
+                    }
+                    showDatePickerTo = false
+                }) { Text("ОК") }
+            }
+        ) { DatePicker(state = datePickerStateTo) }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedTextField(
                 value = state.search,
                 onValueChange = onSearchChange,
-                label = { Text("Поиск (клиент, авто, номер)") },
+                label = { Text("Поиск (клиент, авто)") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true
             )
-            
+
+            var centerExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = centerExpanded,
+                onExpandedChange = { centerExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = state.branches.find { it.id == state.centerId }?.address ?: "Все филиалы",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Филиал") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = centerExpanded) },
+                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = centerExpanded,
+                    onDismissRequest = { centerExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Все филиалы") },
+                        onClick = { onCenterChange(null); centerExpanded = false }
+                    )
+                    state.branches.forEach { branch ->
+                        DropdownMenuItem(
+                            text = { Text(branch.address) },
+                            onClick = { onCenterChange(branch.id); centerExpanded = false }
+                        )
+                    }
+                }
+            }
+
+            val statuses = mapOf(
+                "SCHEDULED" to "Запланировано",
+                "IN_PROGRESS" to "В работе",
+                "COMPLETED" to "Завершено",
+                "CANCELLED" to "Отменено"
+            )
+            var statusExpanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = statusExpanded,
+                onExpandedChange = { statusExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = statuses[state.status] ?: "Все статусы",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Статус") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusExpanded) },
+                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = statusExpanded,
+                    onDismissRequest = { statusExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Все статусы") },
+                        onClick = { onStatusChange(null); statusExpanded = false }
+                    )
+                    statuses.forEach { (key, label) ->
+                        DropdownMenuItem(
+                            text = { Text(label) },
+                            onClick = { onStatusChange(key); statusExpanded = false }
+                        )
+                    }
+                }
+            }
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = DateTimeUtils.formatDate(state.dateFrom),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("С") },
+                    modifier = Modifier.weight(1f).clickable { showDatePickerFrom = true },
+                    enabled = false,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+                OutlinedTextField(
+                    value = DateTimeUtils.formatDate(state.dateTo),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("По") },
+                    modifier = Modifier.weight(1f).clickable { showDatePickerTo = true },
+                    enabled = false,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onApplySearch,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Найти")
+                }
                 Button(
                     onClick = onClearFilters,
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.error)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
                 ) {
-                    Text("Сбросить все")
+                    Text("Сбросить")
                 }
             }
         }

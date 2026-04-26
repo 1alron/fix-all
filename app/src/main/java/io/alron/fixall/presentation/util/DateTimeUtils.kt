@@ -1,12 +1,26 @@
 package io.alron.fixall.presentation.util
 
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+
 object DateTimeUtils {
+    private val apiDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+        timeZone = TimeZone.getTimeZone("UTC")
+    }
+    private val uiDateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.US)
+
     fun formatDate(dateString: String?): String {
         if (dateString.isNullOrBlank()) return ""
         return try {
-            val parts = dateString.split("-")
-            if (parts.size == 3) {
-                "${parts[2]}.${parts[1]}.${parts[0]}"
+            if (dateString.contains("-")) {
+                val parts = dateString.split("-")
+                if (parts.size == 3) {
+                    "${parts[2]}.${parts[1]}.${parts[0]}"
+                } else {
+                    dateString
+                }
             } else {
                 dateString
             }
@@ -27,5 +41,9 @@ object DateTimeUtils {
         } catch (e: Exception) {
             timeString
         }
+    }
+
+    fun millisToApiDate(millis: Long): String {
+        return apiDateFormat.format(Date(millis))
     }
 }
