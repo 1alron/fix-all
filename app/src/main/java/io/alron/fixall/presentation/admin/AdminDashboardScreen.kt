@@ -1,6 +1,8 @@
 package io.alron.fixall.presentation.admin
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +50,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -221,7 +225,7 @@ fun ServicePopularityBlock(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Популярность услуг",
+                    text = "Популярность услуг (топ-5)",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -237,50 +241,83 @@ fun ServicePopularityBlock(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 PeriodButton("Неделя", "week", selectedPeriod == "week") { onPeriodChange("week") }
-                PeriodButton("Месяц", "month", selectedPeriod == "month") { onPeriodChange("month") }
+                PeriodButton(
+                    "Месяц",
+                    "month",
+                    selectedPeriod == "month"
+                ) { onPeriodChange("month") }
             }
 
             Spacer(Modifier.height(24.dp))
 
             stats?.let { s ->
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    s.services.forEach { service ->
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = service.name,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.weight(1f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                val chartColors = listOf(
+                    MaterialTheme.colorScheme.primary,
+                    Color(0xC76608D2),
+                    Color(0xC7980EE5),
+                    Color(0xC7DE1094),
+                    Color.Red,
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier.size(150.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Canvas(modifier = Modifier.size(120.dp)) {
+                            var startAngle = -90f
+                            s.services.forEachIndexed { index, service ->
+                                val sweepAngle = (service.percentage.toFloat() / 100f) * 360f
+                                drawArc(
+                                    color = chartColors[index % chartColors.size],
+                                    startAngle = startAngle,
+                                    sweepAngle = sweepAngle,
+                                    useCenter = false,
+                                    style = Stroke(width = 20.dp.toPx(), cap = StrokeCap.Butt)
+                                )
+                                startAngle += sweepAngle
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.width(24.dp))
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        s.services.take(5).forEachIndexed { index, service ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(chartColors[index % chartColors.size])
                                 )
                                 Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = "${String.format("%.1f", service.percentage)}%",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Column {
+                                    Text(
+                                        text = service.name,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "${
+                                            String.format(
+                                                "%.1f",
+                                                service.percentage
+                                            )
+                                        }% (${service.count})",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = chartColors[index % chartColors.size]
+                                    )
+                                }
                             }
-                            Spacer(Modifier.height(4.dp))
-                            
-                            val animatedProgress by animateFloatAsState(
-                                targetValue = (service.percentage / 100f).toFloat(),
-                                label = "progress"
-                            )
-                            
-                            LinearProgressIndicator(
-                                progress = { animatedProgress },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(CircleShape),
-                                color = MaterialTheme.colorScheme.secondary,
-                                trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
-                            )
                         }
                     }
                 }
@@ -326,14 +363,18 @@ fun AttendanceStatsBlock(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 PeriodButton("Неделя", "week", selectedPeriod == "week") { onPeriodChange("week") }
-                PeriodButton("Месяц", "month", selectedPeriod == "month") { onPeriodChange("month") }
+                PeriodButton(
+                    "Месяц",
+                    "month",
+                    selectedPeriod == "month"
+                ) { onPeriodChange("month") }
             }
 
             Spacer(Modifier.height(24.dp))
 
             stats?.let { s ->
                 val maxCount = s.centers.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
-                
+
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     s.centers.forEach { center ->
                         Column {
@@ -357,13 +398,13 @@ fun AttendanceStatsBlock(
                                 )
                             }
                             Spacer(Modifier.height(4.dp))
-                            
+
                             val progress = center.count.toFloat() / maxCount
                             val animatedProgress by animateFloatAsState(
                                 targetValue = progress,
                                 label = "progress"
                             )
-                            
+
                             LinearProgressIndicator(
                                 progress = { animatedProgress },
                                 modifier = Modifier
@@ -418,7 +459,11 @@ fun StatusStatsBlock(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 PeriodButton("Неделя", "week", selectedPeriod == "week") { onPeriodChange("week") }
-                PeriodButton("Месяц", "month", selectedPeriod == "month") { onPeriodChange("month") }
+                PeriodButton(
+                    "Месяц",
+                    "month",
+                    selectedPeriod == "month"
+                ) { onPeriodChange("month") }
                 PeriodButton("Все время", "all", selectedPeriod == "all") { onPeriodChange("all") }
             }
 
@@ -445,7 +490,9 @@ fun StatusStatsBlock(
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
@@ -479,7 +526,10 @@ fun PeriodButton(
         shape = CircleShape,
         color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
         contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline
+        )
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
             Text(text = label, style = MaterialTheme.typography.labelMedium)
@@ -519,7 +569,11 @@ fun UpcomingAppointmentItem(
                     )
                 }
                 IconButton(onClick = onClick) {
-                    Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
