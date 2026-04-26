@@ -1,5 +1,6 @@
 package io.alron.fixall.presentation.admin
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -44,15 +46,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
 import io.alron.fixall.domain.model.AdminAppointment
+import io.alron.fixall.domain.model.AdminAttendanceStats
 import io.alron.fixall.domain.model.AdminStatusStats
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -147,6 +152,15 @@ fun AdminDashboardScreen(
                         }
 
                         item {
+                            AttendanceStatsBlock(
+                                stats = state.attendanceStats,
+                                isLoading = state.isLoadingAttendance,
+                                selectedPeriod = state.selectedAttendancePeriod,
+                                onPeriodChange = { viewModel.loadAttendanceStats(it) }
+                            )
+                        }
+
+                        item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -167,6 +181,98 @@ fun AdminDashboardScreen(
                             UpcomingAppointmentItem(
                                 appointment = appointment,
                                 onClick = { /* TODO: Open appointment details */ }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AttendanceStatsBlock(
+    stats: AdminAttendanceStats?,
+    isLoading: Boolean,
+    selectedPeriod: String,
+    onPeriodChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Посещаемость филиалов",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PeriodButton("Неделя", "week", selectedPeriod == "week") { onPeriodChange("week") }
+                PeriodButton("Месяц", "month", selectedPeriod == "month") { onPeriodChange("month") }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            stats?.let { s ->
+                val maxCount = s.centers.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
+                
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    s.centers.forEach { center ->
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = center.address,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.weight(1f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = center.count.toString(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            
+                            val progress = center.count.toFloat() / maxCount
+                            val animatedProgress by animateFloatAsState(
+                                targetValue = progress,
+                                label = "progress"
+                            )
+                            
+                            LinearProgressIndicator(
+                                progress = { animatedProgress },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp)
+                                    .clip(CircleShape),
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                             )
                         }
                     }

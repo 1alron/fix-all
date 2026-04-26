@@ -21,6 +21,7 @@ class AdminDashboardViewModel @Inject constructor(
     init {
         loadDashboard()
         loadStatusStats(_state.value.selectedPeriod)
+        loadAttendanceStats(_state.value.selectedAttendancePeriod)
     }
 
     fun loadDashboard() {
@@ -45,6 +46,19 @@ class AdminDashboardViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoadingStatuses = false) }
+                }
+        }
+    }
+
+    fun loadAttendanceStats(period: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingAttendance = true, selectedAttendancePeriod = period) }
+            repository.getAttendanceStats(period)
+                .onSuccess { stats ->
+                    _state.update { it.copy(isLoadingAttendance = false, attendanceStats = stats) }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(isLoadingAttendance = false) }
                 }
         }
     }

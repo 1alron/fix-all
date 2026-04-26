@@ -1,10 +1,7 @@
 package io.alron.fixall.data.repository
 
 import io.alron.fixall.data.remote.api.AdminApi
-import io.alron.fixall.domain.model.AdminAppointment
-import io.alron.fixall.domain.model.AdminDashboardStats
-import io.alron.fixall.domain.model.AdminStatusStats
-import io.alron.fixall.domain.model.StatusInfo
+import io.alron.fixall.domain.model.*
 import io.alron.fixall.domain.repository.AdminRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,6 +47,22 @@ class AdminRepositoryImpl @Inject constructor(
                     period = dto.period,
                     statuses = dto.statuses.mapValues { StatusInfo(it.value.label, it.value.count) },
                     total = dto.total
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getAttendanceStats(period: String): Result<AdminAttendanceStats> {
+        return try {
+            val dto = api.getAttendanceStats(period)
+            Result.success(
+                AdminAttendanceStats(
+                    period = dto.period,
+                    centers = dto.centers.map { 
+                        CenterAttendance(it.id, it.address, it.count)
+                    }
                 )
             )
         } catch (e: Exception) {
