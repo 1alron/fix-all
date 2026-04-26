@@ -19,10 +19,11 @@ class AdminDashboardViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
-        loadStats()
+        loadDashboard()
+        loadStatusStats(_state.value.selectedPeriod)
     }
 
-    fun loadStats() {
+    fun loadDashboard() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             repository.getDashboardStats()
@@ -31,6 +32,19 @@ class AdminDashboardViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoading = false, error = error.message) }
+                }
+        }
+    }
+
+    fun loadStatusStats(period: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingStatuses = true, selectedPeriod = period) }
+            repository.getStatusStats(period)
+                .onSuccess { stats ->
+                    _state.update { it.copy(isLoadingStatuses = false, statusStats = stats) }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(isLoadingStatuses = false) }
                 }
         }
     }

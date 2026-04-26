@@ -3,6 +3,8 @@ package io.alron.fixall.data.repository
 import io.alron.fixall.data.remote.api.AdminApi
 import io.alron.fixall.domain.model.AdminAppointment
 import io.alron.fixall.domain.model.AdminDashboardStats
+import io.alron.fixall.domain.model.AdminStatusStats
+import io.alron.fixall.domain.model.StatusInfo
 import io.alron.fixall.domain.repository.AdminRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,6 +35,21 @@ class AdminRepositoryImpl @Inject constructor(
                             statusDisplay = appointmentDto.statusDisplay
                         )
                     }
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getStatusStats(period: String): Result<AdminStatusStats> {
+        return try {
+            val dto = api.getStatusStats(period)
+            Result.success(
+                AdminStatusStats(
+                    period = dto.period,
+                    statuses = dto.statuses.mapValues { StatusInfo(it.value.label, it.value.count) },
+                    total = dto.total
                 )
             )
         } catch (e: Exception) {
