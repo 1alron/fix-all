@@ -192,4 +192,69 @@ class AdminRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun getServices(filters: Map<String, String>): Result<List<AdminService>> {
+        return try {
+            val results = api.getServices(filters)
+            Result.success(results.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getServiceDetail(id: String): Result<AdminService> {
+        return try {
+            val response = api.getServiceDetail(id)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun createService(request: CreateUpdateServiceRequestDto): Result<AdminService> {
+        return try {
+            val response = api.createService(request)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateService(id: String, request: CreateUpdateServiceRequestDto): Result<AdminService> {
+        return try {
+            val response = api.updateService(id, request)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteService(id: String): Result<Unit> {
+        return try {
+            api.deleteService(id)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun toggleServiceActive(id: String): Result<ToggleActiveResponseDto> {
+        return try {
+            val response = api.toggleServiceActive(id)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private fun AdminServiceItemDto.toDomain() = AdminService(
+        id = id,
+        name = name,
+        description = description,
+        duration = duration,
+        price = price,
+        serviceCenterId = serviceCenterId,
+        centerAddress = centerAddress,
+        isActive = isActive
+    )
 }

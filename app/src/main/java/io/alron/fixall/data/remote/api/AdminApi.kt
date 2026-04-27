@@ -49,4 +49,26 @@ interface AdminApi {
 
     @DELETE("/api/admin-panel/reviews/{id}/")
     suspend fun deleteReview(@Path("id") id: String): DeleteReviewResponseDto
+
+    // Services
+    @GET("/api/admin-panel/services/")
+    suspend fun getServices(@QueryMap filters: Map<String, String>): List<AdminServiceItemDto>
+
+    @GET("/api/admin-panel/services/{id}/")
+    suspend fun getServiceDetail(@Path("id") id: String): AdminServiceItemDto
+
+    @POST("/api/admin-panel/services/")
+    suspend fun createService(@Body request: CreateUpdateServiceRequestDto): AdminServiceItemDto
+
+    @PUT("/api/admin-panel/services/{id}/")
+    suspend fun updateService(
+        @Path("id") id: String,
+        @Body request: CreateUpdateServiceRequestDto
+    ): AdminServiceItemDto
+
+    @DELETE("/api/admin-panel/services/{id}/")
+    suspend fun deleteService(@Path("id") id: String)
+
+    @POST("/api/admin-panel/services/{id}/toggle_active/")
+    suspend fun toggleServiceActive(@Path("id") id: String): ToggleActiveResponseDto
 }

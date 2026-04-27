@@ -15,4 +15,10 @@ interface AdminRepository {
     suspend fun getReviews(filters: Map<String, String>): Result<List<AdminReviewListItemDto>>
     suspend fun replyToReview(id: String, reply: String): Result<AdminReplyResponseDto>
     suspend fun deleteReview(id: String): Result<DeleteReviewResponseDto>
+    suspend fun getServices(filters: Map<String, String>): Result<List<AdminService>>
+    suspend fun getServiceDetail(id: String): Result<AdminService>
+    suspend fun createService(request: CreateUpdateServiceRequestDto): Result<AdminService>
+    suspend fun updateService(id: String, request: CreateUpdateServiceRequestDto): Result<AdminService>
+    suspend fun deleteService(id: String): Result<Unit>
+    suspend fun toggleServiceActive(id: String): Result<ToggleActiveResponseDto>
 }
