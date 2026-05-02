@@ -66,10 +66,10 @@ class AdminRepositoryImpl @Inject constructor(
             Result.success(
                 AdminAttendanceStats(
                     period = dto.period,
-                    centers = dto.centers.map { 
+                    centers = dto.centers.map {
                         CenterAttendance(it.id, it.address, it.count)
                     },
-                    daily = dto.daily?.map { 
+                    daily = dto.daily?.map {
                         AdminDailyAttendance(it.date, it.label, it.count)
                     }
                 )
@@ -101,7 +101,7 @@ class AdminRepositoryImpl @Inject constructor(
             Result.success(
                 AdminServicePopularity(
                     period = dto.period,
-                    services = dto.services.map { 
+                    services = dto.services.map {
                         ServicePopularityItem(it.name, it.count, it.percentage)
                     }
                 )
@@ -159,7 +159,7 @@ class AdminRepositoryImpl @Inject constructor(
                     totalPrice = dto.totalPrice,
                     isPaid = dto.isPaid,
                     paymentStatus = dto.paymentStatus,
-                    paymentInfo = dto.paymentInfo?.let { 
+                    paymentInfo = dto.paymentInfo?.let {
                         AdminPaymentInfo(it.status, it.paidAt, it.amount)
                     },
                     createdAt = dto.createdAt,
@@ -363,8 +363,83 @@ class AdminRepositoryImpl @Inject constructor(
                 Result.failure(Exception(response.message ?: "Failed to set working hours"))
             }
         } catch (e: Exception) {
-            val errorBody = (e as? retrofit2.HttpException)?.response()?.errorBody()?.string()
-            Result.failure(Exception(errorBody ?: e.message))
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getClients(filters: Map<String, String>): Result<List<AdminClientListItemDto>> {
+        return try {
+            Result.success(api.getClients(filters))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getClientDetail(id: Int): Result<AdminClientDetail> {
+        return try {
+            val dto = api.getClientDetail(id)
+            Result.success(AdminClientDetail(
+                id = dto.id,
+                username = dto.username,
+                fullName = dto.fullName,
+                email = dto.email,
+                phone = dto.phone,
+                address = dto.address,
+                dateJoined = dto.dateJoined,
+                isStaff = dto.isStaff,
+                carsCount = dto.carsCount,
+                appointmentsCount = dto.appointmentsCount,
+                totalPaid = dto.totalPaid,
+                cars = dto.cars.map { AdminClientCar(it.id, it.name, it.licensePlate, it.year) },
+                recentAppointments = dto.recentAppointments.map { 
+                    AdminClientAppointment(it.id, it.scheduledDate, it.scheduledTime, it.serviceName, it.centerAddress, it.status, it.statusDisplay)
+                },
+                topServices = dto.topServices.map { AdminClientStatItem(it.name, it.count) },
+                topCenters = dto.topCenters.map { AdminClientStatItem(it.name, it.count) },
+                weekdayCounts = dto.weekdayCounts,
+                hourCounts = dto.hourCounts
+            ))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun createClient(request: CreateClientRequestDto): Result<AdminClient> {
+        return try {
+            val dto = api.createClient(request)
+            Result.success(AdminClient(
+                id = dto.id,
+                username = dto.username,
+                fullName = dto.fullName,
+                email = dto.email,
+                phone = dto.phone,
+                address = dto.address,
+                carsCount = dto.carsCount,
+                appointmentsCount = dto.appointmentsCount,
+                activeAppointmentsCount = dto.activeAppointmentsCount,
+                dateJoined = dto.dateJoined,
+                isStaff = dto.isStaff
+            ))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateClient(id: Int, request: UpdateClientRequestDto): Result<Unit> {
+        return try {
+            api.updateClient(id, request)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteClient(id: Int): Result<Unit> {
+        return try {
+            api.deleteClient(id)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

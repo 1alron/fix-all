@@ -12,5 +12,8 @@ enum class MainRoute {
     AdminServices,
     AdminBranches,
     AdminBranchDetail,
-    AdminAddEditBranch
+    AdminAddEditBranch,
+    AdminClients,
+    AdminClientDetail,
+    AdminAddEditClient
 }

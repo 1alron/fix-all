@@ -123,4 +123,22 @@ interface AdminApi {
         @Path("id") id: String,
         @Body request: SetWorkingHoursRequestDto
     ): SetWorkingHoursResponseDto
+
+    @GET("/api/admin-panel/clients/")
+    suspend fun getClients(@QueryMap filters: Map<String, String>): List<AdminClientListItemDto>
+
+    @GET("/api/admin-panel/clients/{id}/info/")
+    suspend fun getClientDetail(@Path("id") id: Int): AdminClientDetailDto
+
+    @POST("/api/admin-panel/clients/create_user/")
+    suspend fun createClient(@Body request: CreateClientRequestDto): AdminClientListItemDto
+
+    @PUT("/api/admin-panel/clients/{id}/update/")
+    suspend fun updateClient(
+        @Path("id") id: Int,
+        @Body request: UpdateClientRequestDto
+    ): SuccessResponseDto
+
+    @DELETE("/api/admin-panel/clients/{id}/delete/")
+    suspend fun deleteClient(@Path("id") id: Int): SuccessResponseDto
 }

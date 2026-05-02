@@ -82,6 +82,7 @@ fun AdminDashboardScreen(
     onReviewsClick: () -> Unit,
     onServicesClick: () -> Unit,
     onBranchesClick: () -> Unit,
+    onClientsClick: () -> Unit,
     viewModel: AdminDashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -169,7 +170,8 @@ fun AdminDashboardScreen(
                                     onAllAppointmentsClick = onAllAppointmentsClick,
                                     onReviewsClick = onReviewsClick,
                                     onServicesClick = onServicesClick,
-                                    onBranchesClick = onBranchesClick
+                                    onBranchesClick = onBranchesClick,
+                                    onClientsClick = onClientsClick
                                 )
                             }
 
@@ -255,7 +257,8 @@ fun AdminActionsBlock(
     onAllAppointmentsClick: () -> Unit,
     onReviewsClick: () -> Unit,
     onServicesClick: () -> Unit,
-    onBranchesClick: () -> Unit
+    onBranchesClick: () -> Unit,
+    onClientsClick: () -> Unit
 ) {
     Column {
         Text(
@@ -302,7 +305,7 @@ fun AdminActionsBlock(
                 ActionItem(
                     label = "Пользователи",
                     icon = Icons.Default.Person,
-                    onClick = { /* TODO */ }
+                    onClick = onClientsClick
                 )
             }
             item {

@@ -32,4 +32,10 @@ interface AdminRepository {
     suspend fun updateBranchPhoto(id: String, photoFile: File): Result<String>
     suspend fun getBranchWorkingHours(id: String): Result<List<AdminWorkingHour>>
     suspend fun setBranchWorkingHours(id: String, workingHour: AdminWorkingHour): Result<AdminWorkingHour>
+
+    suspend fun getClients(filters: Map<String, String>): Result<List<AdminClientListItemDto>>
+    suspend fun getClientDetail(id: Int): Result<AdminClientDetail>
+    suspend fun createClient(request: CreateClientRequestDto): Result<AdminClient>
+    suspend fun updateClient(id: Int, request: UpdateClientRequestDto): Result<Unit>
+    suspend fun deleteClient(id: Int): Result<Unit>
 }
