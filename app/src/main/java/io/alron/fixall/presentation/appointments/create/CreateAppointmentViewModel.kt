@@ -2,6 +2,7 @@ package io.alron.fixall.presentation.appointments.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.alron.fixall.domain.model.Branch
 import io.alron.fixall.domain.model.Car
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import javax.inject.Inject
 
 sealed class CreateAppointmentEvent {
@@ -27,7 +29,8 @@ sealed class CreateAppointmentEvent {
 class CreateAppointmentViewModel @Inject constructor(
     private val appointmentsRepository: AppointmentsRepository,
     private val branchesRepository: BranchesRepository,
-    private val carsRepository: CarsRepository
+    private val carsRepository: CarsRepository,
+    private val gson: Gson
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CreateAppointmentState())
@@ -128,7 +131,7 @@ class CreateAppointmentViewModel @Inject constructor(
                 }.onFailure { throwable ->
                     _eventChannel.send(
                         CreateAppointmentEvent.ShowToast(
-                            throwable.localizedMessage ?: "Error loading slots"
+                            getErrorMessage(throwable)
                         )
                     )
                 }
@@ -159,11 +162,25 @@ class CreateAppointmentViewModel @Inject constructor(
             }.onFailure { throwable ->
                 _eventChannel.send(
                     CreateAppointmentEvent.ShowToast(
-                        throwable.localizedMessage ?: "Error creating appointment"
+                        getErrorMessage(throwable)
                     )
                 )
             }
             _state.update { it.copy(isSaving = false) }
+        }
+    }
+
+    private fun getErrorMessage(throwable: Throwable): String {
+        return if (throwable is HttpException) {
+            try {
+                val errorBody = throwable.response()?.errorBody()?.string()
+                val errorMap = gson.fromJson(errorBody, Map::class.java)
+                errorMap["error"]?.toString() ?: errorMap["message"]?.toString() ?: "Ошибка сервера"
+            } catch (e: Exception) {
+                "Что-то пошло не так"
+            }
+        } else {
+            throwable.localizedMessage ?: "Ошибка сети"
         }
     }
 }

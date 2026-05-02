@@ -33,6 +33,11 @@ import io.alron.fixall.R
 import io.alron.fixall.domain.model.Car
 import io.alron.fixall.presentation.MainRoute
 import io.alron.fixall.presentation.ModalDrawerRoute
+import io.alron.fixall.presentation.admin.AdminDashboardScreen
+import io.alron.fixall.presentation.admin.appointments.AdminAppointmentsScreen
+import io.alron.fixall.presentation.admin.appointments.details.AdminAppointmentDetailScreen
+import io.alron.fixall.presentation.admin.reviews.AdminReviewsScreen
+import io.alron.fixall.presentation.admin.services.AdminServicesScreen
 import io.alron.fixall.presentation.appointments.AppointmentsListScreen
 import io.alron.fixall.presentation.appointments.create.CreateAppointmentScreen
 import io.alron.fixall.presentation.appointments.details.AppointmentDetailsScreen
@@ -99,6 +104,7 @@ fun MainNavHost() {
                         onAccountIconClick = { navigateToTab(MainRoute.Profile.name) },
                         onAddAppointmentClick = { navController.navigate("create_appointment") },
                         onFindBranchClick = { navigateToTab(ModalDrawerRoute.ServiceCenters.name) },
+                        onAppointmentClick = { id -> navController.navigate("appointment_details/$id") },
                         scrollState = scrollState,
                         bottomSpacer = bottomScreenWithBarSpacer
                     )
@@ -107,12 +113,56 @@ fun MainNavHost() {
                 composable(MainRoute.Profile.name) {
                     ProfileScreen(
                         onStatsClick = { navController.navigate(MainRoute.Stats.name) },
+                        onAdminClick = { navController.navigate(MainRoute.AdminDashboard.name) },
                         bottomSpacer = bottomScreenWithBarSpacer
                     )
                 }
 
                 composable(MainRoute.Stats.name) {
                     StatsScreen(onBack = { navController.popBackStack() })
+                }
+
+                composable(MainRoute.AdminDashboard.name) {
+                    AdminDashboardScreen(
+                        onBack = { navController.popBackStack() },
+                        onNewAppointmentClick = { navController.navigate("create_appointment") },
+                        onAllAppointmentsClick = { navController.navigate(MainRoute.AdminAppointments.name) },
+                        onAppointmentClick = { id ->
+                            navController.navigate("${MainRoute.AdminAppointmentDetail.name}/$id")
+                        },
+                        onReviewsClick = { navController.navigate(MainRoute.AdminReviews.name) },
+                        onServicesClick = { navController.navigate(MainRoute.AdminServices.name) }
+                    )
+                }
+
+                composable(MainRoute.AdminAppointments.name) {
+                    AdminAppointmentsScreen(
+                        onBack = { navController.popBackStack() },
+                        onAppointmentClick = { id -> 
+                            navController.navigate("${MainRoute.AdminAppointmentDetail.name}/$id")
+                        }
+                    )
+                }
+
+                composable(
+                    route = "${MainRoute.AdminAppointmentDetail.name}/{id}",
+                    arguments = listOf(navArgument("id") { type = NavType.StringType })
+                ) {
+                    AdminAppointmentDetailScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable(MainRoute.AdminReviews.name) {
+                    AdminReviewsScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable(MainRoute.AdminServices.name) {
+                    AdminServicesScreen(
+                        onBack = { navController.popBackStack() }
+                    )
                 }
 
                 composable(ModalDrawerRoute.Cars.name) {

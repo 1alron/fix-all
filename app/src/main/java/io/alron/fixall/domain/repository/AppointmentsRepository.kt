@@ -1,5 +1,7 @@
 package io.alron.fixall.domain.repository
 
+import io.alron.fixall.data.remote.dto.PaymentStatusDto
+import io.alron.fixall.data.remote.dto.SyncPaymentStatusResponseDto
 import io.alron.fixall.domain.model.Appointment
 import io.alron.fixall.domain.model.Service
 import io.alron.fixall.domain.model.TimeSlots
@@ -29,4 +31,6 @@ interface AppointmentsRepository {
         date: String
     ): Result<TimeSlots>
     suspend fun initiatePayment(appointmentId: String, bonusAmount: Double): Result<String>
+    suspend fun getPaymentStatus(id: String): Result<PaymentStatusDto>
+    suspend fun syncPaymentStatus(id: String): Result<SyncPaymentStatusResponseDto>
 }

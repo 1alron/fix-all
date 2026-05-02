@@ -10,6 +10,7 @@ fun UserDto.toDomain() = User(
     firstName = firstName,
     lastName = lastName,
     fullName = fullName,
+    isAdmin = isStaff,
     profile = profile.toDomain()
 )
 

@@ -1,0 +1,811 @@
+package io.alron.fixall.presentation.admin
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.alron.fixall.R
+import io.alron.fixall.domain.model.AdminAppointment
+import io.alron.fixall.domain.model.AdminAttendanceStats
+import io.alron.fixall.domain.model.AdminServicePopularity
+import io.alron.fixall.domain.model.AdminStatusStats
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdminDashboardScreen(
+    onBack: () -> Unit,
+    onNewAppointmentClick: () -> Unit,
+    onAllAppointmentsClick: () -> Unit,
+    onAppointmentClick: (String) -> Unit,
+    onReviewsClick: () -> Unit,
+    onServicesClick: () -> Unit,
+    viewModel: AdminDashboardViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.admin_panel)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        PullToRefreshBox(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            isRefreshing = state.isLoading && state.stats != null,
+            onRefresh = { viewModel.refresh() }
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (state.isLoading && state.stats == null) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (state.error != null && state.stats == null) {
+                    Text(
+                        text = state.error!!,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else {
+                    state.stats?.let { stats ->
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp)
+                        ) {
+                            item {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(2),
+                                    modifier = Modifier.height(300.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    item {
+                                        StatCard(
+                                            title = "Всего записей",
+                                            value = stats.totalAppointments.toString(),
+                                            icon = Icons.Default.DateRange,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    item {
+                                        StatCard(
+                                            title = "Активные услуги",
+                                            value = stats.activeServices.toString(),
+                                            icon = Icons.Default.Build,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                    item {
+                                        StatCard(
+                                            title = "Клиенты",
+                                            value = stats.totalClients.toString(),
+                                            icon = Icons.Default.Person,
+                                            color = MaterialTheme.colorScheme.tertiary
+                                        )
+                                    }
+                                    item {
+                                        StatCard(
+                                            title = "Филиалы",
+                                            value = stats.totalCenters.toString(),
+                                            icon = Icons.Default.Place,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            }
+
+                            item {
+                                AdminActionsBlock(
+                                    onNewAppointmentClick = onNewAppointmentClick,
+                                    onAllAppointmentsClick = onAllAppointmentsClick,
+                                    onReviewsClick = onReviewsClick,
+                                    onServicesClick = onServicesClick
+                                )
+                            }
+
+                            item {
+                                StatusStatsBlock(
+                                    stats = state.statusStats,
+                                    isLoading = state.isLoadingStatuses,
+                                    selectedPeriod = state.selectedPeriod,
+                                    onPeriodChange = { viewModel.loadStatusStats(it) }
+                                )
+                            }
+
+                            item {
+                                ServicePopularityBlock(
+                                    stats = state.servicePopularity,
+                                    isLoading = state.isLoadingPopularity,
+                                    selectedPeriod = state.selectedPopularityPeriod,
+                                    onPeriodChange = { viewModel.loadServicePopularity(it) }
+                                )
+                            }
+
+                            item {
+                                AttendanceStatsBlock(
+                                    stats = state.attendanceStats,
+                                    isLoading = state.isLoadingAttendance,
+                                    selectedPeriod = state.selectedAttendancePeriod,
+                                    onPeriodChange = { viewModel.loadAttendanceStats(it) }
+                                )
+                            }
+
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Ближайшие записи",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    TextButton(onClick = onAllAppointmentsClick) {
+                                        Text("Все записи")
+                                    }
+                                }
+                            }
+
+                            if (stats.upcoming.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Нет ближайших записей",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(stats.upcoming) { appointment ->
+                                    UpcomingAppointmentItem(
+                                        appointment = appointment,
+                                        onClick = { onAppointmentClick(appointment.id) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AdminActionsBlock(
+    onNewAppointmentClick: () -> Unit,
+    onAllAppointmentsClick: () -> Unit,
+    onReviewsClick: () -> Unit,
+    onServicesClick: () -> Unit
+) {
+    Column {
+        Text(
+            text = "Управление",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.height(220.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                ActionItem(
+                    label = "Новая запись",
+                    icon = Icons.Default.Add,
+                    onClick = onNewAppointmentClick
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Все записи",
+                    icon = Icons.AutoMirrored.Filled.List,
+                    onClick = onAllAppointmentsClick
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Филиалы",
+                    icon = Icons.Default.Place,
+                    onClick = { /* TODO */ }
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Отзывы",
+                    icon = Icons.Default.Star,
+                    onClick = onReviewsClick
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Пользователи",
+                    icon = Icons.Default.Person,
+                    onClick = { /* TODO */ }
+                )
+            }
+            item {
+                ActionItem(
+                    label = "Услуги",
+                    icon = Icons.Default.Build,
+                    onClick = onServicesClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ActionItem(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(28.dp)
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun ServicePopularityBlock(
+    stats: AdminServicePopularity?,
+    isLoading: Boolean,
+    selectedPeriod: String,
+    onPeriodChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Популярность услуг (топ-5)",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PeriodButton("Неделя", "week", selectedPeriod == "week") { onPeriodChange("week") }
+                PeriodButton(
+                    "Месяц",
+                    "month",
+                    selectedPeriod == "month"
+                ) { onPeriodChange("month") }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            stats?.let { s ->
+                val chartColors = listOf(
+                    MaterialTheme.colorScheme.primary,
+                    Color(0xC76608D2),
+                    Color(0xC7980EE5),
+                    Color(0xC7DE1094),
+                    Color.Red,
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier.size(150.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Canvas(modifier = Modifier.size(120.dp)) {
+                            var startAngle = -90f
+                            s.services.forEachIndexed { index, service ->
+                                val sweepAngle = (service.percentage.toFloat() / 100f) * 360f
+                                drawArc(
+                                    color = chartColors[index % chartColors.size],
+                                    startAngle = startAngle,
+                                    sweepAngle = sweepAngle,
+                                    useCenter = false,
+                                    style = Stroke(width = 20.dp.toPx(), cap = StrokeCap.Butt)
+                                )
+                                startAngle += sweepAngle
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.width(24.dp))
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        s.services.take(5).forEachIndexed { index, service ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(chartColors[index % chartColors.size])
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = service.name,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "${
+                                            String.format(
+                                                "%.1f",
+                                                service.percentage
+                                            )
+                                        }% (${service.count})",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = chartColors[index % chartColors.size]
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AttendanceStatsBlock(
+    stats: AdminAttendanceStats?,
+    isLoading: Boolean,
+    selectedPeriod: String,
+    onPeriodChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Посещаемость филиалов",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PeriodButton("Неделя", "week", selectedPeriod == "week") { onPeriodChange("week") }
+                PeriodButton(
+                    "Месяц",
+                    "month",
+                    selectedPeriod == "month"
+                ) { onPeriodChange("month") }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            stats?.let { s ->
+                val maxCount = s.centers.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
+
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    s.centers.forEach { center ->
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = center.address,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.weight(1f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = center.count.toString(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Spacer(Modifier.height(4.dp))
+
+                            val progress = center.count.toFloat() / maxCount
+                            val animatedProgress by animateFloatAsState(
+                                targetValue = progress,
+                                label = "progress"
+                            )
+
+                            LinearProgressIndicator(
+                                progress = { animatedProgress },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp)
+                                    .clip(CircleShape),
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StatusStatsBlock(
+    stats: AdminStatusStats?,
+    isLoading: Boolean,
+    selectedPeriod: String,
+    onPeriodChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Статусы записей",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PeriodButton("Неделя", "week", selectedPeriod == "week") { onPeriodChange("week") }
+                PeriodButton(
+                    "Месяц",
+                    "month",
+                    selectedPeriod == "month"
+                ) { onPeriodChange("month") }
+                PeriodButton("Все время", "all", selectedPeriod == "all") { onPeriodChange("all") }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            stats?.let { s ->
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    s.statuses.forEach { (_, info) ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = info.label, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                text = info.count.toString(),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Итого",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = s.total.toString(),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PeriodButton(
+    label: String,
+    period: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.height(32.dp),
+        shape = CircleShape,
+        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+        contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline
+        )
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
+            Text(text = label, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+@Composable
+fun UpcomingAppointmentItem(
+    appointment: AdminAppointment,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "${appointment.date} в ${appointment.time}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = appointment.statusDisplay,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = onClick) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            DetailItem(icon = Icons.Default.Person, text = appointment.client)
+            DetailItem(icon = Icons.Default.Build, text = appointment.service)
+            DetailItem(icon = Icons.Default.ShoppingCart, text = appointment.car)
+            DetailItem(icon = Icons.Default.Place, text = appointment.center)
+
+            Spacer(Modifier.height(16.dp))
+
+            Button(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Открыть")
+            }
+        }
+    }
+}
+
+@Composable
+fun DetailItem(icon: ImageVector, text: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 2.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+fun StatCard(
+    title: String,
+    value: String,
+    icon: ImageVector,
+    color: Color
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(140.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.1f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(32.dp)
+            )
+            Column {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = color
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}

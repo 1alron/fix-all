@@ -87,3 +87,19 @@ data class PaymentResponseDto(
     val amount: Double? = null,
     val status: String? = null
 )
+
+data class PaymentStatusDto(
+    @SerializedName("payment_id") val paymentId: String? = null,
+    val status: String? = null,
+    @SerializedName("status_display") val statusDisplay: String? = null,
+    @SerializedName("paid_at") val paidAt: String? = null,
+    val amount: Double? = null,
+    @SerializedName("appointment_status") val appointmentStatus: String? = null,
+    @SerializedName("payment_url") val paymentUrl: String? = null,
+    val message: String? = null
+)
+
+data class SyncPaymentStatusResponseDto(
+    @SerializedName("is_paid") val isPaid: Boolean,
+    @SerializedName("payment_status") val paymentStatus: String?
+)

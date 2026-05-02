@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -34,6 +35,7 @@ import io.alron.fixall.domain.model.Appointment
 import io.alron.fixall.domain.model.LoyaltyInfo
 import io.alron.fixall.presentation.appointments.getStatusColor
 import io.alron.fixall.presentation.components.MainToolbar
+import io.alron.fixall.presentation.util.DateTimeUtils
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Locale
 
@@ -74,8 +76,8 @@ fun AppointmentDetailsScreen(
     ) { innerPadding ->
         PullToRefreshBox(
             modifier = Modifier.padding(innerPadding).fillMaxSize(),
-            isRefreshing = state.isLoading && state.appointment != null,
-            onRefresh = { state.appointment?.id?.let { viewModel.getDetails(it) } }
+            isRefreshing = state.isRefreshing,
+            onRefresh = { state.appointment?.id?.let { viewModel.refreshDetails(it) } }
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 if (state.isLoading && state.appointment == null) {
@@ -118,13 +120,23 @@ fun AppointmentDetailsScreen(
                         if (appointment.status != "CANCELLED") {
                             if (appointment.isPaid) {
                                 PaidStatusCard(appointment = appointment)
-                            } else if (appointment.status == "SCHEDULED") {
-                                PaymentBlock(
-                                    appointment = appointment,
-                                    loyaltyInfo = state.loyaltyInfo,
-                                    onPayClick = { bonus -> viewModel.initiatePayment(bonus) },
-                                    isPaying = state.isPaying
-                                )
+                            } else if (appointment.status == "SCHEDULED" || appointment.status == "IN_PROGRESS") {
+                                val currentPaymentStatus = state.paymentStatus
+                                if (currentPaymentStatus != null && currentPaymentStatus.status == "pending") {
+                                    PendingPaymentBlock(
+                                        amount = currentPaymentStatus.amount ?: 0.0,
+                                        onCheckStatus = { viewModel.syncPaymentStatus() },
+                                        onContinuePayment = { viewModel.continuePayment() },
+                                        isChecking = state.isCheckingPayment
+                                    )
+                                } else {
+                                    PaymentBlock(
+                                        appointment = appointment,
+                                        loyaltyInfo = state.loyaltyInfo,
+                                        onPayClick = { bonus -> viewModel.initiatePayment(bonus) },
+                                        isPaying = state.isPaying
+                                    )
+                                }
                             }
                         }
 
@@ -161,6 +173,54 @@ fun AppointmentDetailsScreen(
 
                         Spacer(Modifier.height(100.dp))
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PendingPaymentBlock(
+    amount: Double,
+    onCheckStatus: () -> Unit,
+    onContinuePayment: () -> Unit,
+    isChecking: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f))
+    ) {
+        Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.tertiary)
+            Text("Ожидает оплаты", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                text = String.format(Locale.getDefault(), "Сумма: %.2f ₽", amount),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(
+                    onClick = onCheckStatus,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = !isChecking
+                ) {
+                    if (isChecking) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text("Проверить")
+                    }
+                }
+                Button(
+                    onClick = onContinuePayment,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Продолжить")
                 }
             }
         }
@@ -223,7 +283,7 @@ fun PaidStatusCard(appointment: Appointment) {
 
             appointment.paymentDate?.let {
                 Text(
-                    text = "Платеж выполнен $it",
+                    text = "Платеж выполнен ${DateTimeUtils.formatFullDateTime(it)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF1B5E20).copy(alpha = 0.7f),
                     textAlign = TextAlign.Center
@@ -241,7 +301,7 @@ fun PaymentBlock(
     isPaying: Boolean
 ) {
     var bonusInput by remember { mutableStateOf("0") }
-    val basePrice = appointment.totalPrice.toDoubleOrNull() ?: 0.0
+    val basePrice = appointment.totalPrice.toString().toDoubleOrNull() ?: 0.0
     val discountPercent = loyaltyInfo?.totalDiscount ?: 0.0
     val discountAmount = basePrice * (discountPercent / 100.0)
     val priceAfterDiscount = basePrice - discountAmount

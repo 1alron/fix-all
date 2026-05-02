@@ -37,4 +37,10 @@ interface AppointmentsApi {
         @Path("id") id: String,
         @Body request: PaymentRequestDto
     ): PaymentResponseDto
+
+    @GET("/api/appointments/{id}/payment_status/")
+    suspend fun getPaymentStatus(@Path("id") id: String): PaymentStatusDto
+
+    @POST("/api/appointments/{id}/sync_payment_status/")
+    suspend fun syncPaymentStatus(@Path("id") id: String): SyncPaymentStatusResponseDto
 }
