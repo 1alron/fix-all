@@ -48,6 +48,12 @@ class AdminAppointmentsViewModel @Inject constructor(
         }
     }
 
+    fun refreshSilently() {
+        viewModelScope.launch {
+            fetchAppointments()
+        }
+    }
+
     private suspend fun fetchAppointments() {
         val filters = mutableMapOf<String, String>()
         _state.value.centerId?.let { filters["center_id"] = it }

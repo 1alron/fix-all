@@ -20,9 +20,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.domain.model.AdminAppointmentListItem
 import io.alron.fixall.presentation.util.DateTimeUtils
@@ -36,6 +39,19 @@ fun AdminAppointmentsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showFilters by remember { mutableStateOf(false) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshSilently()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -81,7 +97,7 @@ fun AdminAppointmentsScreen(
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    if (state.isLoading) {
+                    if (state.isLoading && state.appointments.isEmpty()) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     } else if (state.error != null && state.appointments.isEmpty()) {
                         Text(
@@ -89,7 +105,7 @@ fun AdminAppointmentsScreen(
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.align(Alignment.Center)
                         )
-                    } else if (state.appointments.isEmpty()) {
+                    } else if (state.appointments.isEmpty() && !state.isLoading) {
                         Text(
                             text = "Записей не найдено",
                             modifier = Modifier.align(Alignment.Center)

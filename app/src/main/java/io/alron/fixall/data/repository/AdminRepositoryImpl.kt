@@ -5,6 +5,10 @@ import io.alron.fixall.data.remote.dto.*
 import io.alron.fixall.domain.model.*
 import io.alron.fixall.domain.repository.AdminRepository
 import io.alron.fixall.presentation.util.DateTimeUtils
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,9 +45,9 @@ class AdminRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getStatusStats(period: String): Result<AdminStatusStats> {
+    override suspend fun getStatusStats(period: String, centerId: String?): Result<AdminStatusStats> {
         return try {
-            val dto = api.getStatusStats(period)
+            val dto = api.getStatusStats(period, centerId)
             Result.success(
                 AdminStatusStats(
                     period = dto.period,
@@ -56,14 +60,17 @@ class AdminRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAttendanceStats(period: String): Result<AdminAttendanceStats> {
+    override suspend fun getAttendanceStats(period: String, centerId: String?): Result<AdminAttendanceStats> {
         return try {
-            val dto = api.getAttendanceStats(period)
+            val dto = api.getAttendanceStats(period, centerId)
             Result.success(
                 AdminAttendanceStats(
                     period = dto.period,
-                    centers = dto.centers.map { 
+                    centers = dto.centers.map {
                         CenterAttendance(it.id, it.address, it.count)
+                    },
+                    daily = dto.daily?.map {
+                        AdminDailyAttendance(it.date, it.label, it.count)
                     }
                 )
             )
@@ -72,13 +79,29 @@ class AdminRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getServicePopularity(period: String): Result<AdminServicePopularity> {
+    override suspend fun getBranchAttendanceStats(centerId: String, period: String): Result<BranchAttendanceStats> {
         return try {
-            val dto = api.getServicePopularity(period)
+            val dto = api.getBranchAttendanceStats(centerId, period)
+            Result.success(
+                BranchAttendanceStats(
+                    centerId = dto.centerId,
+                    period = dto.period,
+                    labels = dto.labels,
+                    data = dto.data
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getServicePopularity(period: String, centerId: String?): Result<AdminServicePopularity> {
+        return try {
+            val dto = api.getServicePopularity(period, centerId)
             Result.success(
                 AdminServicePopularity(
                     period = dto.period,
-                    services = dto.services.map { 
+                    services = dto.services.map {
                         ServicePopularityItem(it.name, it.count, it.percentage)
                     }
                 )
@@ -136,7 +159,7 @@ class AdminRepositoryImpl @Inject constructor(
                     totalPrice = dto.totalPrice,
                     isPaid = dto.isPaid,
                     paymentStatus = dto.paymentStatus,
-                    paymentInfo = dto.paymentInfo?.let { 
+                    paymentInfo = dto.paymentInfo?.let {
                         AdminPaymentInfo(it.status, it.paidAt, it.amount)
                     },
                     createdAt = dto.createdAt,
@@ -202,6 +225,15 @@ class AdminRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getUniqueServiceNames(): Result<List<String>> {
+        return try {
+            val results = api.getUniqueServices()
+            Result.success(results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun getServiceDetail(id: String): Result<AdminService> {
         return try {
             val response = api.getServiceDetail(id)
@@ -247,6 +279,170 @@ class AdminRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getBranches(): Result<List<AdminBranch>> {
+        return try {
+            val results = api.getBranches()
+            Result.success(results.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getBranchDetail(id: String): Result<AdminBranch> {
+        return try {
+            val response = api.getBranchDetail(id)
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun createBranch(address: String, phone: String, openingHours: String): Result<AdminBranch> {
+        return try {
+            val response = api.createBranch(CreateUpdateBranchRequestDto(address, phone, openingHours))
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateBranch(id: String, address: String, phone: String, openingHours: String): Result<AdminBranch> {
+        return try {
+            val response = api.updateBranch(id, CreateUpdateBranchRequestDto(address, phone, openingHours))
+            Result.success(response.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteBranch(id: String): Result<Unit> {
+        return try {
+            api.deleteBranch(id)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateBranchPhoto(id: String, photoFile: File): Result<String> {
+        return try {
+            val requestFile = photoFile.asRequestBody("image/*".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("photo", photoFile.name, requestFile)
+            val response = api.updateBranchPhoto(id, body)
+            Result.success(response.photoUrl)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getBranchWorkingHours(id: String): Result<List<AdminWorkingHour>> {
+        return try {
+            val results = api.getBranchWorkingHours(id)
+            Result.success(results.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun setBranchWorkingHours(id: String, workingHour: AdminWorkingHour): Result<AdminWorkingHour> {
+        return try {
+            val response = api.setBranchWorkingHours(
+                id,
+                SetWorkingHoursRequestDto(
+                    dayOfWeek = workingHour.dayOfWeek,
+                    startTime = workingHour.startTime,
+                    endTime = workingHour.endTime,
+                    lunchStart = workingHour.lunchStart,
+                    lunchEnd = workingHour.lunchEnd,
+                    isWorking = workingHour.isWorking
+                )
+            )
+            if (response.success) {
+                Result.success(response.data?.toDomain() ?: workingHour)
+            } else {
+                Result.failure(Exception(response.message ?: "Failed to set working hours"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getClients(filters: Map<String, String>): Result<List<AdminClientListItemDto>> {
+        return try {
+            Result.success(api.getClients(filters))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getClientDetail(id: Int): Result<AdminClientDetail> {
+        return try {
+            val dto = api.getClientDetail(id)
+            Result.success(AdminClientDetail(
+                id = dto.id,
+                username = dto.username,
+                fullName = dto.fullName,
+                email = dto.email,
+                phone = dto.phone,
+                address = dto.address,
+                dateJoined = dto.dateJoined,
+                isStaff = dto.isStaff,
+                carsCount = dto.carsCount,
+                appointmentsCount = dto.appointmentsCount,
+                totalPaid = dto.totalPaid,
+                cars = dto.cars.map { AdminClientCar(it.id, it.name, it.licensePlate, it.year) },
+                recentAppointments = dto.recentAppointments.map { 
+                    AdminClientAppointment(it.id, it.scheduledDate, it.scheduledTime, it.serviceName, it.centerAddress, it.status, it.statusDisplay)
+                },
+                topServices = dto.topServices.map { AdminClientStatItem(it.name, it.count) },
+                topCenters = dto.topCenters.map { AdminClientStatItem(it.name, it.count) },
+                weekdayCounts = dto.weekdayCounts,
+                hourCounts = dto.hourCounts
+            ))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun createClient(request: CreateClientRequestDto): Result<AdminClient> {
+        return try {
+            val dto = api.createClient(request)
+            Result.success(AdminClient(
+                id = dto.id,
+                username = dto.username,
+                fullName = dto.fullName,
+                email = dto.email,
+                phone = dto.phone,
+                address = dto.address,
+                carsCount = dto.carsCount,
+                appointmentsCount = dto.appointmentsCount,
+                activeAppointmentsCount = dto.activeAppointmentsCount,
+                dateJoined = dto.dateJoined,
+                isStaff = dto.isStaff
+            ))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateClient(id: Int, request: UpdateClientRequestDto): Result<Unit> {
+        return try {
+            api.updateClient(id, request)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteClient(id: Int): Result<Unit> {
+        return try {
+            api.deleteClient(id)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     private fun AdminServiceItemDto.toDomain() = AdminService(
         id = id,
         name = name,
@@ -256,5 +452,26 @@ class AdminRepositoryImpl @Inject constructor(
         serviceCenterId = serviceCenterId,
         centerAddress = centerAddress,
         isActive = isActive
+    )
+
+    private fun AdminBranchListItemDto.toDomain() = AdminBranch(
+        id = id,
+        address = address,
+        phone = phone,
+        openingHours = openingHours,
+        photo = photo ?: photoUrl,
+        servicesCount = servicesCount,
+        workingHours = workingHours?.map { it.toDomain() } ?: emptyList()
+    )
+
+    private fun AdminWorkingHourDto.toDomain() = AdminWorkingHour(
+        id = id,
+        dayOfWeek = dayOfWeek,
+        dayDisplay = dayDisplay,
+        startTime = startTime,
+        endTime = endTime,
+        lunchStart = lunchStart,
+        lunchEnd = lunchEnd,
+        isWorking = isWorking
     )
 }
