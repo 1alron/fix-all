@@ -29,7 +29,11 @@ class AdminBranchDetailViewModel @Inject constructor(
 
     init {
         val calendar = Calendar.getInstance()
-        val initialDate = DateTimeUtils.millisToApiDate(calendar.timeInMillis)
+        val initialDate = String.format(Locale.US, "%d-%02d-%02d", 
+            calendar.get(Calendar.YEAR), 
+            calendar.get(Calendar.MONTH) + 1, 
+            calendar.get(Calendar.DAY_OF_MONTH))
+            
         val initialDisplay = String.format(Locale.getDefault(), "%02d.%02d.%d", 
             calendar.get(Calendar.DAY_OF_MONTH), 
             calendar.get(Calendar.MONTH) + 1, 
