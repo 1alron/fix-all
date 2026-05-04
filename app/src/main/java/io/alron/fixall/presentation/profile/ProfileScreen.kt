@@ -491,7 +491,7 @@ fun LoyaltyCard(loyalty: LoyaltyInfo) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${stringResource(R.string.personal_discount)}: ${loyalty.personalDiscount}%",
+                    text = "${stringResource(R.string.personal_discount)}: ${loyalty.totalDiscount}%",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
