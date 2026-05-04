@@ -1,0 +1,91 @@
+package io.alron.fixall.di
+
+import android.content.Context
+import com.google.gson.Gson
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import io.alron.fixall.data.remote.api.AdminApi
+import io.alron.fixall.data.remote.api.AppointmentsApi
+import io.alron.fixall.data.remote.api.BranchesApi
+import io.alron.fixall.data.remote.api.CarsApi
+import io.alron.fixall.data.remote.api.ProfileApi
+import io.alron.fixall.data.repository.AdminRepositoryImpl
+import io.alron.fixall.data.repository.AppointmentsRepositoryImpl
+import io.alron.fixall.data.repository.BranchesRepositoryImpl
+import io.alron.fixall.data.repository.CarsRepositoryImpl
+import io.alron.fixall.data.repository.ProfileRepositoryImpl
+import io.alron.fixall.domain.repository.AdminRepository
+import io.alron.fixall.domain.repository.AppointmentsRepository
+import io.alron.fixall.domain.repository.BranchesRepository
+import io.alron.fixall.domain.repository.CarsRepository
+import io.alron.fixall.domain.repository.ProfileRepository
+import retrofit2.Retrofit
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object MainModule {
+    @Provides
+    @Singleton
+    fun providesBranchesApi(
+        retrofit: Retrofit
+    ): BranchesApi = retrofit.create(BranchesApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesBranchesRepository(
+        branchesApi: BranchesApi
+    ): BranchesRepository = BranchesRepositoryImpl(branchesApi)
+
+    @Provides
+    @Singleton
+    fun providesCarsApi(
+        retrofit: Retrofit
+    ): CarsApi = retrofit.create(CarsApi::class.java)
+
+    @Provides
+    fun providesCarsRepository(
+        carsApi: CarsApi,
+        @ApplicationContext context: Context,
+        gson: Gson
+    ): CarsRepository = CarsRepositoryImpl(carsApi, context, gson)
+
+    @Provides
+    @Singleton
+    fun providesAppointmentsApi(
+        retrofit: Retrofit
+    ): AppointmentsApi = retrofit.create(AppointmentsApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesAppointmentsRepository(
+        appointmentsApi: AppointmentsApi
+    ): AppointmentsRepository = AppointmentsRepositoryImpl(appointmentsApi)
+
+    @Provides
+    @Singleton
+    fun providesProfileApi(
+        retrofit: Retrofit
+    ): ProfileApi = retrofit.create(ProfileApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesProfileRepository(
+        profileApi: ProfileApi
+    ): ProfileRepository = ProfileRepositoryImpl(profileApi)
+
+    @Provides
+    @Singleton
+    fun providesAdminApi(
+        retrofit: Retrofit
+    ): AdminApi = retrofit.create(AdminApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providesAdminRepository(
+        adminApi: AdminApi
+    ): AdminRepository = AdminRepositoryImpl(adminApi)
+}

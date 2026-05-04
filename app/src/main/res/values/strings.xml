@@ -1,3 +1,161 @@
 <resources>
     <string name="app_name">Fix All</string>
+
+    <string name="logo_icon_content_description">Логотип</string>
+    <string name="invalid_credentials">Неверное имя пользователя или пароль</string>
+    <string name="network_error">Нет соединения с интернетом</string>
+    <string name="server_error">Ошибка сервера</string>
+    <string name="unknown_error">Что-то пошло не так</string>
+    <string name="no_account">Нет аккаунта?</string>
+    <string name="create_it_free">Создайте его бесплатно</string>
+    <string name="logging_in">Вход</string>
+    <string name="username">Имя пользователя</string>
+    <string name="password">Пароль</string>
+    <string name="log_in">Войти</string>
+    <string name="warning_icon">Предупреждающая иконка</string>
+    <string name="hide_password">Скрыть пароль</string>
+    <string name="show_password">Показать пароль</string>
+    <string name="field_cant_be_blank">Это поле не может быть пустым</string>
+
+    <string name="registration">Регистрация</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="register">Зарегистрироваться</string>
+    <string name="already_have_account">Уже есть аккаунт?</string>
+
+    <string name="first_name">Имя</string>
+    <string name="last_name">Фамилия</string>
+    <string name="email">Email</string>
+    <string name="passwords_dont_match">Пароли не совпадают</string>
+    <string name="continue_button">Продолжить</string>
+    <string name="back">Назад</string>
+    <string name="invalid_email_format">Неверный формат email</string>
+    <string name="password_too_short">Пароль должен содержать минимум 8 символов</string>
+
+    <string name="confirm_you_agree_with">Подтвердите, что вы ознакомились и согласны с</string>
+    <string name="and">и</string>
+    <string name="policy">Политикой конфиденциальности</string>
+    <string name="terms_of_use">Условиями использования</string>
+
+    <string name="go_to_general">Перейти на главную</string>
+    <string name="my_appointments">Мои записи</string>
+    <string name="go_to_profile">Перейти в профиль</string>
+    <string name="profile">Профиль</string>
+
+    <string name="general">Главная</string>
+    <string name="profile_icon">Иконка профиля</string>
+    <string name="logout">Выйти из аккаунта</string>
+    <string name="branches">Филиалы</string>
+    <string name="our_branches">Наши филиалы</string>
+
+    <string name="branch_image">Фото филиала</string>
+
+    <string name="how_service_works">Как работает сервис</string>
+    <string name="create_appointment">Создать запись</string>
+
+    <string name="my_cars">Мои автомобили</string>
+    <string name="you_have_no_cars">У вас пока нет автомобилей!</string>
+    <string name="add_car">Добавить автомобиль</string>
+    <string name="add_first_car_description">Добавьте свой первый автомобиль, чтобы записываться на сервис</string>
+    <string name="year_of_manufacture">Год выпуска: %1$d</string>
+    <string name="edit">Изменить</string>
+    <string name="edit_car">Изменить автомобиль</string>
+    <string name="delete">Удалить</string>
+
+    <string name="delete_car_title">Удалить автомобиль?</string>
+    <string name="delete_car_message">Вы уверены, что хотите удалить этот автомобиль? Это действие нельзя будет отменить.</string>
+    <string name="cancel">Отмена</string>
+
+    <string name="invalid_year">Год должен быть не менее 1900 и не более текущего</string>
+    <string name="invalid_license_plate">Неверный формат гос. номера</string>
+    <string name="invalid_vin">Неверный формат VIN-кода (17 символов)</string>
+
+    <string name="photo">Фото</string>
+    <string name="brand">Марка</string>
+    <string name="model">Модель</string>
+    <string name="creating_year">Год выпуска</string>
+    <string name="license_plate">Гос. номер</string>
+    <string name="vin">VIN (необязательно)</string>
+
+    <string name="save_changes">Сохранить изменения</string>
+    <string name="save_car">Сохранить автомобиль</string>
+
+    <string name="car_updated_successfully">Автомобиль успешно обновлен</string>
+
+    <string name="open">Открыто</string>
+    <string name="closed">Закрыто</string>
+    <string name="leave_review">Оставить отзыв</string>
+
+    <string name="ok">ОК</string>
+    <string name="new_appointment">Новая запись</string>
+    <string name="select_service_center">Выберите сервисный центр</string>
+    <string name="select_branch">Выберите филиал</string>
+    <string name="select_service">Выберите услугу</string>
+    <string name="select_car">Выберите автомобиль</string>
+    <string name="have_no_cars_add">У вас нет автомобилей. Добавить?</string>
+    <string name="add_new_car">+ Добавить новый автомобиль</string>
+    <string name="select_date">Выберите дату</string>
+    <string name="select_time">Выберите время</string>
+    <string name="no_slots_available_for_date">Нет доступных слотов на эту дату</string>
+    <string name="comment">Комментарий</string>
+    <string name="type_something_important">Напишите что-нибудь важное...</string>
+    <string name="confirm_appointment">Подтвердить запись</string>
+
+    <string name="you_have_no_appointments">У вас пока нет записей</string>
+    <string name="appoint_to_service_centers">Запишитесь на обслуживание в один из наших сервисных центров</string>
+
+    <string name="reviews">Отзывы</string>
+    <string name="no_reviews_yet">Отзывов пока нет</string>
+
+    <string name="your_rating">Ваша оценка:</string>
+    <string name="min_20_chars">Минимум 20 символов</string>
+    <string name="send">Отправить</string>
+    <string name="admin_response">Ответ администратора</string>
+
+    <!-- Profile & Stats -->
+    <string name="loyalty_program">Программа лояльности</string>
+    <string name="your_status">ВАШ СТАТУС</string>
+    <string name="bonuses">Бонусы</string>
+    <string name="personal_discount">Ваша скидка</string>
+    <string name="next_status_progress">До статуса %1$s: %2$d%%</string>
+    <string name="personal_data">Личные данные</string>
+    <string name="login_label">Логин</string>
+    <string name="name_and_surname">Имя и фамилия</string>
+    <string name="first_name_label">Имя</string>
+    <string name="last_name_label">Фамилия</string>
+    <string name="phone_label">Телефон</string>
+    <string name="address_label">Адрес</string>
+    <string name="not_specified">Не указан</string>
+    <string name="view_statistics">Посмотреть статистику</string>
+    <string name="edit_profile">Редактировать профиль</string>
+    <string name="save">Сохранить</string>
+    <string name="profile_updated">Профиль обновлен</string>
+    <string name="invalid_login_format">Только буквы, цифры и @/./+/-/_</string>
+    <string name="invalid_phone_format">Формат: +79991234567</string>
+    <string name="admin_panel">Панель администратора</string>
+
+    <string name="logout_button">Выйти</string>
+    <string name="logout_confirmation_title">Выйти из аккаунта?</string>
+    <string name="logout_confirmation_message">Вы уверены, что хотите выйти? Вам придется войти снова, чтобы пользоваться сервисом.</string>
+
+    <string name="stats_title">Ваша статистика</string>
+    <string name="total_appointments">Всего записей</string>
+    <string name="spent">Траты</string>
+    <string name="visits_by_day">Активность по дням недели</string>
+    <string name="visits_by_hour">Активность по часам (00-23)</string>
+    <string name="top_services">Популярные услуги</string>
+    <string name="stat_completed">Успешно</string>
+    <string name="stat_cancelled">Отменено</string>
+    <string name="times_unit">%1$d раз</string>
+
+    <string name="welcome_back">С возвращением</string>
+    <string name="welcome_back_personal">С возвращением, %1$s!</string>
+    <string name="upcoming_appointment_title">Предстоящая запись</string>
+    <string name="at_time">в</string>
+    <string name="loading_loyalty">Загрузка данных лояльности...</string>
+
+    <string name="visits_label">Визитов</string>
+    <string name="spent_label">Потрачено</string>
+    <string name="currency_rub">%1$d ₽</string>
+    <string name="finished">Завершено</string>
+    <string name="popular_services">Популярные услуги</string>
 </resources>
