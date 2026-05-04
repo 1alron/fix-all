@@ -102,17 +102,21 @@ fun AdminAppointmentDetailScreen(
                             }
 
 
-                            val (paymentLabel, paymentColor) = when (appointment.paymentStatus) {
-                                "succeeded" -> "Оплачено" to MaterialTheme.colorScheme.primaryContainer
-                                "pending" -> "Ожидает оплаты" to MaterialTheme.colorScheme.tertiaryContainer
-                                "canceled" -> "Отменен" to MaterialTheme.colorScheme.errorContainer
-                                else -> "Не оплачено" to MaterialTheme.colorScheme.surfaceVariant
+                            val (paymentLabel, paymentColor) = when {
+                                appointment.isPaid || appointment.paymentStatus == "succeeded" -> 
+                                    "Оплачено" to MaterialTheme.colorScheme.primaryContainer
+                                appointment.paymentStatus == "pending" -> 
+                                    "Ожидает оплаты" to MaterialTheme.colorScheme.tertiaryContainer
+                                appointment.paymentStatus == "canceled" -> 
+                                    "Отменен" to MaterialTheme.colorScheme.errorContainer
+                                else -> 
+                                    "Не оплачено" to MaterialTheme.colorScheme.surfaceVariant
                             }
                             
-                            val onPaymentTextColor = when (appointment.paymentStatus) {
-                                "succeeded" -> MaterialTheme.colorScheme.onPrimaryContainer
-                                "pending" -> MaterialTheme.colorScheme.onTertiaryContainer
-                                "canceled" -> MaterialTheme.colorScheme.onErrorContainer
+                            val onPaymentTextColor = when {
+                                appointment.isPaid || appointment.paymentStatus == "succeeded" -> MaterialTheme.colorScheme.onPrimaryContainer
+                                appointment.paymentStatus == "pending" -> MaterialTheme.colorScheme.onTertiaryContainer
+                                appointment.paymentStatus == "canceled" -> MaterialTheme.colorScheme.onErrorContainer
                                 else -> MaterialTheme.colorScheme.onSurfaceVariant
                             }
 
