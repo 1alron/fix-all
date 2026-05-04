@@ -68,6 +68,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.alron.fixall.R
 import io.alron.fixall.domain.model.AdminAppointment
 import io.alron.fixall.domain.model.AdminAttendanceStats
+import io.alron.fixall.domain.model.AdminDailyAttendance
 import io.alron.fixall.domain.model.AdminServicePopularity
 import io.alron.fixall.domain.model.AdminStatusStats
 
@@ -80,6 +81,8 @@ fun AdminDashboardScreen(
     onAppointmentClick: (String) -> Unit,
     onReviewsClick: () -> Unit,
     onServicesClick: () -> Unit,
+    onBranchesClick: () -> Unit,
+    onClientsClick: () -> Unit,
     viewModel: AdminDashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -166,7 +169,9 @@ fun AdminDashboardScreen(
                                     onNewAppointmentClick = onNewAppointmentClick,
                                     onAllAppointmentsClick = onAllAppointmentsClick,
                                     onReviewsClick = onReviewsClick,
-                                    onServicesClick = onServicesClick
+                                    onServicesClick = onServicesClick,
+                                    onBranchesClick = onBranchesClick,
+                                    onClientsClick = onClientsClick
                                 )
                             }
 
@@ -251,7 +256,9 @@ fun AdminActionsBlock(
     onNewAppointmentClick: () -> Unit,
     onAllAppointmentsClick: () -> Unit,
     onReviewsClick: () -> Unit,
-    onServicesClick: () -> Unit
+    onServicesClick: () -> Unit,
+    onBranchesClick: () -> Unit,
+    onClientsClick: () -> Unit
 ) {
     Column {
         Text(
@@ -284,7 +291,7 @@ fun AdminActionsBlock(
                 ActionItem(
                     label = "Филиалы",
                     icon = Icons.Default.Place,
-                    onClick = { /* TODO */ }
+                    onClick = onBranchesClick
                 )
             }
             item {
@@ -298,7 +305,7 @@ fun AdminActionsBlock(
                 ActionItem(
                     label = "Пользователи",
                     icon = Icons.Default.Person,
-                    onClick = { /* TODO */ }
+                    onClick = onClientsClick
                 )
             }
             item {
@@ -494,7 +501,7 @@ fun AttendanceStatsBlock(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Посещаемость филиалов",
+                    text = if (stats?.daily != null) "Посещаемость по дням" else "Посещаемость филиалов",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -520,50 +527,99 @@ fun AttendanceStatsBlock(
             Spacer(Modifier.height(24.dp))
 
             stats?.let { s ->
-                val maxCount = s.centers.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
+                if (s.daily != null && s.daily.isNotEmpty()) {
+                    DailyAttendanceChart(s.daily)
+                } else {
+                    val maxCount = s.centers.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
 
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    s.centers.forEach { center ->
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = center.address,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.weight(1f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        s.centers.forEach { center ->
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = center.address,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.weight(1f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = center.count.toString(),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Spacer(Modifier.height(4.dp))
+
+                                val progress = center.count.toFloat() / maxCount
+                                val animatedProgress by animateFloatAsState(
+                                    targetValue = progress,
+                                    label = "progress"
                                 )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = center.count.toString(),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold
+
+                                LinearProgressIndicator(
+                                    progress = { animatedProgress },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(CircleShape),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                                 )
                             }
-                            Spacer(Modifier.height(4.dp))
-
-                            val progress = center.count.toFloat() / maxCount
-                            val animatedProgress by animateFloatAsState(
-                                targetValue = progress,
-                                label = "progress"
-                            )
-
-                            LinearProgressIndicator(
-                                progress = { animatedProgress },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(CircleShape),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                            )
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun DailyAttendanceChart(daily: List<AdminDailyAttendance>) {
+    val maxCount = daily.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
+    
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        daily.forEach { day ->
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = day.label,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = day.count.toString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                
+                val progress = day.count.toFloat() / maxCount
+                val animatedProgress by animateFloatAsState(
+                    targetValue = progress,
+                    label = "daily_progress"
+                )
+                
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(CircleShape),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                )
             }
         }
     }

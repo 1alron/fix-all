@@ -36,6 +36,12 @@ import io.alron.fixall.presentation.ModalDrawerRoute
 import io.alron.fixall.presentation.admin.AdminDashboardScreen
 import io.alron.fixall.presentation.admin.appointments.AdminAppointmentsScreen
 import io.alron.fixall.presentation.admin.appointments.details.AdminAppointmentDetailScreen
+import io.alron.fixall.presentation.admin.branches.AdminBranchesScreen
+import io.alron.fixall.presentation.admin.branches.add_edit.AdminAddEditBranchScreen
+import io.alron.fixall.presentation.admin.branches.detail.AdminBranchDetailScreen
+import io.alron.fixall.presentation.admin.clients.AdminClientsScreen
+import io.alron.fixall.presentation.admin.clients.add_edit.AdminAddEditClientScreen
+import io.alron.fixall.presentation.admin.clients.detail.AdminClientDetailScreen
 import io.alron.fixall.presentation.admin.reviews.AdminReviewsScreen
 import io.alron.fixall.presentation.admin.services.AdminServicesScreen
 import io.alron.fixall.presentation.appointments.AppointmentsListScreen
@@ -131,7 +137,9 @@ fun MainNavHost() {
                             navController.navigate("${MainRoute.AdminAppointmentDetail.name}/$id")
                         },
                         onReviewsClick = { navController.navigate(MainRoute.AdminReviews.name) },
-                        onServicesClick = { navController.navigate(MainRoute.AdminServices.name) }
+                        onServicesClick = { navController.navigate(MainRoute.AdminServices.name) },
+                        onBranchesClick = { navController.navigate(MainRoute.AdminBranches.name) },
+                        onClientsClick = { navController.navigate(MainRoute.AdminClients.name) }
                     )
                 }
 
@@ -161,6 +169,74 @@ fun MainNavHost() {
 
                 composable(MainRoute.AdminServices.name) {
                     AdminServicesScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable(MainRoute.AdminBranches.name) {
+                    AdminBranchesScreen(
+                        onBack = { navController.popBackStack() },
+                        onAddBranch = { navController.navigate(MainRoute.AdminAddEditBranch.name) },
+                        onBranchClick = { id ->
+                            navController.navigate("${MainRoute.AdminBranchDetail.name}/$id")
+                        }
+                    )
+                }
+
+                composable(
+                    route = "${MainRoute.AdminBranchDetail.name}/{branchId}",
+                    arguments = listOf(navArgument("branchId") { type = NavType.StringType })
+                ) {
+                    AdminBranchDetailScreen(
+                        onBack = { navController.popBackStack() },
+                        onEditBranch = { id ->
+                            navController.navigate("${MainRoute.AdminAddEditBranch.name}?branchId=$id")
+                        },
+                        onAppointmentClick = { id ->
+                            navController.navigate("${MainRoute.AdminAppointmentDetail.name}/$id")
+                        }
+                    )
+                }
+
+                composable(
+                    route = MainRoute.AdminAddEditBranch.name + "?branchId={branchId}",
+                    arguments = listOf(
+                        navArgument("branchId") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        }
+                    )
+                ) {
+                    AdminAddEditBranchScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable(MainRoute.AdminClients.name) {
+                    AdminClientsScreen(
+                        onBack = { navController.popBackStack() },
+                        onAddClient = { navController.navigate(MainRoute.AdminAddEditClient.name) },
+                        onClientClick = { id ->
+                            navController.navigate("${MainRoute.AdminClientDetail.name}/$id")
+                        }
+                    )
+                }
+
+                composable(
+                    route = "${MainRoute.AdminClientDetail.name}/{clientId}",
+                    arguments = listOf(navArgument("clientId") { type = NavType.IntType })
+                ) {
+                    AdminClientDetailScreen(
+                        onBack = { navController.popBackStack() },
+                        onAppointmentClick = { id ->
+                            navController.navigate("${MainRoute.AdminAppointmentDetail.name}/$id")
+                        }
+                    )
+                }
+
+                composable(MainRoute.AdminAddEditClient.name) {
+                    AdminAddEditClientScreen(
                         onBack = { navController.popBackStack() }
                     )
                 }
